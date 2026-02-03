@@ -219,12 +219,13 @@ extra = INFO_EXTRA.get(nombre_bd, None)
 
 if extra is not None:
     tipos = extra.get("tipos_atributos", [])
-    clases_sig = extra.get("clases_significado", {})
 
     if len(tipos) > 0:
-        st.sidebar.markdown("**Tipos de atributos**")
-        for t in tipos:
-            st.sidebar.markdown(f"- {t}")
+        # Mostramos solo los nombres de las categorías (antes de ":")
+        nombres = [t.split(":")[0].strip() for t in tipos]
+        st.sidebar.markdown(
+            "**Tipos de atributos:** " + " · ".join(nombres)
+        )
     
 st.sidebar.markdown("---")
 
@@ -241,15 +242,14 @@ if extra is not None:
     clases_sig = extra.get("clases_significado", {})
 
     if len(clases_sig) > 0:
-        st.sidebar.markdown("**¿Qué representa cada clase?**")
+        with st.sidebar.expander("¿Qué representa cada clase?", expanded=False):
+            for cls in class_names:
+                if cls in clases_sig:
+                    st.markdown(f"- **{cls}**: {clases_sig[cls]}")
 
-        for cls in class_names:
-            if cls in clases_sig:
-                st.sidebar.markdown(f"- **{cls}**: {clases_sig[cls]}")
-
-        for cls, desc in clases_sig.items():
-            if cls not in class_names:
-                st.sidebar.markdown(f"- **{cls}**: {desc}")
+            for cls, desc in clases_sig.items():
+                if cls not in class_names:
+                    st.markdown(f"- **{cls}**: {desc}")
 
 if y_test is not None:
 
