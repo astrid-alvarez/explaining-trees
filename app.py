@@ -208,7 +208,7 @@ st.sidebar.markdown(
         <b>Descripción:</b> {info_texto['desc']}<br/>
         <b>Registros:</b> {total_registros_reales}<br/>
         <b>Variables:</b> {total_variables}<br/>
-        <b>Categorías de variables:</b> {tipos_texto}<br/>
+        <b>Categorías de las variables:</b> {tipos_texto}<br/>
         <b>Variable objetivo:</b> {info_texto['target']}
     </div>
     """,
