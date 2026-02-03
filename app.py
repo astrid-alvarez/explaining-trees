@@ -118,9 +118,9 @@ INFO_EXTRA = {
         "tipos_atributos": [
             "Institucionales",
             "Demográficas",
-            "Infraestructura TIC",
-            "Inventario TIC",
-            "Gestión y prácticas TIC",
+            "Infraestructura",
+            "Inventario",
+            "Gestión y prácticas",
         ],
         "clases_significado": {
             "Ningún día de la semana": "No se usan bienes TIC durante la semana.",
@@ -136,20 +136,20 @@ INFO_EXTRA = {
             "Demográficas",
             "Clínicas",
             "Pruebas diagnósticas",
-            "Ejercicio y esfuerzo físico",
+            "Ejercicio y esfuerzo físico.",
         ],
         "clases_significado": {
-            0: "Nivel 0: menor severidad de enfermedad.",
-            1: "Nivel 1 de severidad de enfermedad.",
-            2: "Nivel 2 de severidad de enfermedad.",
-            3: "Nivel 3 de severidad de enfermedad.",
-            4: "Nivel 4: mayor severidad de enfermedad.",
+            0: "Nivel 0: menor severidad de la enfermedad.",
+            1: "Nivel 1 de severidad de la enfermedad.",
+            2: "Nivel 2 de severidad de la enfermedad.",
+            3: "Nivel 3 de severidad de la enfermedad.",
+            4: "Nivel 4: mayor severidad de la enfermedad.",
         },
     },
 
     "BD6_Cancer": {
         "tipos_atributos": [
-            "Citológicas y morfológicas",
+            "Citológicas y morfológicas.",
         ],
         "clases_significado": {
             "Benigno": "Tumor no cancerígeno.",
@@ -159,7 +159,7 @@ INFO_EXTRA = {
 
     "BD7_Iris": {
         "tipos_atributos": [
-            "Morfológicas",
+            "Morfológicas.",
         ],
         "clases_significado": {
             "setosa": "Especie Iris setosa.",
