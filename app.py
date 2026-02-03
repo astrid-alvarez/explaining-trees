@@ -48,7 +48,7 @@ INFO_BDS = {
         "target": "Tiempo de readmisión (<30, >30, No)."
     },
     "BD3_Forestal": {
-        "desc": "Datos cartográficos de bosques.",
+        "desc": "Datos espectrales para clasificar tipos de cobertura forestal.",
         "target": "Tipo de cubierta forestal."
     },
     "BD4_EduDane": {
@@ -71,12 +71,17 @@ INFO_BDS = {
 
 # -----------------------------------------------------------------------------
 # NUEVO: Información contextual adicional (Sección 1)
-# - Tipos de atributos (sin conteos)
+# - Tipos de atributos
 # - Significado de clases de la variable objetivo
 # -----------------------------------------------------------------------------
 INFO_EXTRA = {
+
     "BD1_Educacion": {
-        "tipos_atributos": [ "Académicas","Socioeconómicas","Demográficas",],
+        "tipos_atributos": [
+            "Académicas",
+            "Socioeconómicas",
+            "Demográficas",
+        ],
         "clases_significado": {
             "Dropout": "Abandona el programa antes de completarlo.",
             "Graduate": "Completa el programa y se gradúa.",
@@ -86,9 +91,9 @@ INFO_EXTRA = {
 
     "BD2_Diabetes": {
         "tipos_atributos": [
-            "Clínicos: diagnósticos, procedimientos, laboratorio, comorbilidades.",
-            "Administrativos: visitas, hospitalización, reingresos, uso del servicio.",
-            "Demográficos: perfil del paciente (edad, género, etc.).",
+            "Clínicas",
+            "Administrativas",
+            "Demográficas",
         ],
         "clases_significado": {
             "<30": "Readmisión hospitalaria en menos de 30 días.",
@@ -97,9 +102,54 @@ INFO_EXTRA = {
         },
     },
 
+    "BD3_Forestal": {
+        "tipos_atributos": [
+            "Espectrales",
+        ],
+        "clases_significado": {
+            "s": "Tipo de cubierta forestal clase s.",
+            "d": "Tipo de cubierta forestal clase d.",
+            "h": "Tipo de cubierta forestal clase h.",
+            "o": "Tipo de cubierta forestal clase o.",
+        },
+    },
+
+    "BD4_EduDane": {
+        "tipos_atributos": [
+            "Institucionales",
+            "Demográficas",
+            "Infraestructura TIC",
+            "Inventario TIC",
+            "Gestión y prácticas TIC",
+        ],
+        "clases_significado": {
+            "Ningún día de la semana": "No se usan bienes TIC durante la semana.",
+            "Una vez al mes pero no todos los meses del año": "Uso esporádico durante el año.",
+            "Al menos una vez al mes": "Uso mensual esporádico de bienes TIC.",
+            "Al menos una vez a la semana": "Uso semanal esporádico de bienes TIC.",
+            "Todos los días de la semana": "Uso diario de bienes TIC.",
+        },
+    },
+
+    "BD5_Heart": {
+        "tipos_atributos": [
+            "Demográficas",
+            "Clínicas",
+            "Pruebas diagnósticas",
+            "Ejercicio y esfuerzo físico",
+        ],
+        "clases_significado": {
+            0: "Nivel 0: menor severidad de enfermedad.",
+            1: "Nivel 1 de severidad de enfermedad.",
+            2: "Nivel 2 de severidad de enfermedad.",
+            3: "Nivel 3 de severidad de enfermedad.",
+            4: "Nivel 4: mayor severidad de enfermedad.",
+        },
+    },
+
     "BD6_Cancer": {
         "tipos_atributos": [
-            "Citológicos/Morfológicos: características de células/núcleos (medidas y texturas).",
+            "Citológicas y morfológicas",
         ],
         "clases_significado": {
             "Benigno": "Tumor no cancerígeno.",
@@ -109,7 +159,7 @@ INFO_EXTRA = {
 
     "BD7_Iris": {
         "tipos_atributos": [
-            "Morfológicos: longitudes y anchos de sépalo/pétalo.",
+            "Morfológicas",
         ],
         "clases_significado": {
             "setosa": "Especie Iris setosa.",
@@ -117,6 +167,7 @@ INFO_EXTRA = {
             "virginica": "Especie Iris virginica.",
         },
     },
+
 }
 
 
