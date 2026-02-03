@@ -225,24 +225,31 @@ if extra is not None:
         st.sidebar.markdown("**Tipos de atributos**")
         for t in tipos:
             st.sidebar.markdown(f"- {t}")
-
-    if len(clases_sig) > 0:
-        st.sidebar.markdown("**¿Qué representa cada clase?**")
-        # Mostramos en el orden real del modelo si coincide
-        for cls in class_names:
-            if cls in clases_sig:
-                st.sidebar.markdown(f"- **{cls}**: {clases_sig[cls]}")
-
-        # Fallback por si las clases del modelo no son strings (0,1,2,...)
-        for cls, desc in clases_sig.items():
-            if cls not in class_names:
-                st.sidebar.markdown(f"- **{cls}**: {desc}")
-
+    
 st.sidebar.markdown("---")
 
 
 # --- Distribución de clases ---
 st.sidebar.subheader("Distribución de la Variable Objetivo")
+
+# -----------------------------------------------------------------------------
+# NUEVO: Significado de clases (ubicado junto a la distribución)
+# -----------------------------------------------------------------------------
+extra = INFO_EXTRA.get(nombre_bd, None)
+
+if extra is not None:
+    clases_sig = extra.get("clases_significado", {})
+
+    if len(clases_sig) > 0:
+        st.sidebar.markdown("**¿Qué representa cada clase?**")
+
+        for cls in class_names:
+            if cls in clases_sig:
+                st.sidebar.markdown(f"- **{cls}**: {clases_sig[cls]}")
+
+        for cls, desc in clases_sig.items():
+            if cls not in class_names:
+                st.sidebar.markdown(f"- **{cls}**: {desc}")
 
 if y_test is not None:
 
