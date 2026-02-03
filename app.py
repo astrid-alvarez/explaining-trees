@@ -40,7 +40,7 @@ PALETTE = [
 
 INFO_BDS = {
     "BD1_Educacion": {
-        "desc": "Datos académicos y socioeconómicos de estudiantes.",
+        "desc": "Datos de estudiantes universitarios para analizar su trayectoria académica y permanencia.",
         "target": "Estado del estudiante (Dropout, Graduate, Enrolled)."
     },
     "BD2_Diabetes": {
@@ -52,7 +52,7 @@ INFO_BDS = {
         "target": "Tipo de cubierta forestal."
     },
     "BD4_EduDane": {
-        "desc": "Encuesta de apropiación tecnológica en establecimientos educativos del Cauca.",
+        "desc": "Apropiación tecnológica en establecimientos educativos del Cauca.",
         "target": "Frecuencia de uso de bienes TIC."
     },
     "BD5_Heart": {
@@ -76,15 +76,11 @@ INFO_BDS = {
 # -----------------------------------------------------------------------------
 INFO_EXTRA = {
     "BD1_Educacion": {
-        "tipos_atributos": [
-            "Académicos: rendimiento, créditos, evaluaciones, avance curricular.",
-            "Socioeconómicos: financiación, pagos, becas, condiciones económicas.",
-            "Demográficos: características del estudiante (edad, género, etc.).",
-        ],
+        "tipos_atributos": [ "Académicas","Socioeconómicas","Demográficas",],
         "clases_significado": {
-            "Dropout": "Estudiante que abandona el programa antes de completarlo.",
-            "Graduate": "Estudiante que completa el programa y se gradúa.",
-            "Enrolled": "Estudiante que continúa matriculado (sin abandonar ni graduarse).",
+            "Dropout": "Abandona el programa antes de completarlo.",
+            "Graduate": "Completa el programa y se gradúa.",
+            "Enrolled": "Continúa matriculado (sin abandonar ni graduarse).",
         },
     },
 
