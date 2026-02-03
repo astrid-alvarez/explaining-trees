@@ -195,40 +195,17 @@ total_registros_reales = n_train + total_registros
 total_variables = X_test.shape[1] if hasattr(X_test, 'shape') else 0
 
 # 5. Generar la tarjeta con los datos solicitados
-st.sidebar.markdown(
-    f"""
-    <div style="background-color:#FFFFFF;
-                padding:10px 14px;
-                border-radius:8px;
-                color:black;
-                font-size:0.9rem;
-                border: 1px solid #e0e0e0;">
-        <b>Descripción:</b> {info_texto['desc']}<br/>
-        <b>Variable objetivo:</b> {info_texto['target']}<br/>
-        <b>Registros:</b> {total_registros_reales}<br/>
-        <b>Variables:</b> {total_variables}
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# -----------------------------------------------------------------------------
-# NUEVO: Contexto inmediato (Sección 1)
-# -----------------------------------------------------------------------------
 extra = INFO_EXTRA.get(nombre_bd, None)
+tipos = extra.get("tipos_atributos", []) if extra else []
+nombres_tipos = [t.split(":")[0].strip() for t in tipos]  # solo categorías
 
-if extra is not None:
-    tipos = extra.get("tipos_atributos", [])
+tipos_texto = " · ".join(nombres_tipos) if nombres_tipos else "—"
 
-    if len(tipos) > 0:
-        # Mostramos solo los nombres de las categorías (antes de ":")
-        nombres = [t.split(":")[0].strip() for t in tipos]
-        st.sidebar.markdown(
-            "**Tipos de atributos:** " + " · ".join(nombres)
-        )
-    
-st.sidebar.markdown("---")
+extra = INFO_EXTRA.get(nombre_bd, None)
+tipos = extra.get("tipos_atributos", []) if extra else []
+nombres_tipos = [t.split(":")[0].strip() for t in tipos]  # solo categorías
 
+tipos_texto = " · ".join(nombres_tipos) if nombres_tipos else "—"
 
 # --- Distribución de clases ---
 st.sidebar.subheader("Distribución de la Variable Objetivo")
