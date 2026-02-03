@@ -69,6 +69,61 @@ INFO_BDS = {
     }
 }
 
+# -----------------------------------------------------------------------------
+# NUEVO: Información contextual adicional (Sección 1)
+# - Tipos de atributos (sin conteos)
+# - Significado de clases de la variable objetivo
+# -----------------------------------------------------------------------------
+INFO_EXTRA = {
+    "BD1_Educacion": {
+        "tipos_atributos": [
+            "Académicos: rendimiento, créditos, evaluaciones, avance curricular.",
+            "Socioeconómicos: financiación, pagos, becas, condiciones económicas.",
+            "Demográficos: características del estudiante (edad, género, etc.).",
+        ],
+        "clases_significado": {
+            "Dropout": "Estudiante que abandona el programa antes de completarlo.",
+            "Graduate": "Estudiante que completa el programa y se gradúa.",
+            "Enrolled": "Estudiante que continúa matriculado (sin abandonar ni graduarse).",
+        },
+    },
+
+    "BD2_Diabetes": {
+        "tipos_atributos": [
+            "Clínicos: diagnósticos, procedimientos, laboratorio, comorbilidades.",
+            "Administrativos: visitas, hospitalización, reingresos, uso del servicio.",
+            "Demográficos: perfil del paciente (edad, género, etc.).",
+        ],
+        "clases_significado": {
+            "<30": "Readmisión hospitalaria en menos de 30 días.",
+            ">30": "Readmisión hospitalaria en más de 30 días.",
+            "No": "Sin readmisión hospitalaria registrada.",
+        },
+    },
+
+    "BD6_Cancer": {
+        "tipos_atributos": [
+            "Citológicos/Morfológicos: características de células/núcleos (medidas y texturas).",
+        ],
+        "clases_significado": {
+            "Benigno": "Tumor no cancerígeno.",
+            "Maligno": "Tumor cancerígeno.",
+        },
+    },
+
+    "BD7_Iris": {
+        "tipos_atributos": [
+            "Morfológicos: longitudes y anchos de sépalo/pétalo.",
+        ],
+        "clases_significado": {
+            "setosa": "Especie Iris setosa.",
+            "versicolor": "Especie Iris versicolor.",
+            "virginica": "Especie Iris virginica.",
+        },
+    },
+}
+
+
 st.title("Plataforma de Evaluación XAI: Árboles Especialistas")
 st.markdown(
     "<p style='font-size:0.95rem'><b>Objetivo:</b> "
@@ -156,6 +211,36 @@ st.sidebar.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# -----------------------------------------------------------------------------
+# NUEVO: Contexto inmediato (Sección 1)
+# -----------------------------------------------------------------------------
+extra = INFO_EXTRA.get(nombre_bd, None)
+
+if extra is not None:
+    tipos = extra.get("tipos_atributos", [])
+    clases_sig = extra.get("clases_significado", {})
+
+    if len(tipos) > 0:
+        st.sidebar.markdown("**Tipos de atributos**")
+        for t in tipos:
+            st.sidebar.markdown(f"- {t}")
+
+    if len(clases_sig) > 0:
+        st.sidebar.markdown("**¿Qué representa cada clase?**")
+        # Mostramos en el orden real del modelo si coincide
+        for cls in class_names:
+            if cls in clases_sig:
+                st.sidebar.markdown(f"- **{cls}**: {clases_sig[cls]}")
+
+        # Fallback por si las clases del modelo no son strings (0,1,2,...)
+        for cls, desc in clases_sig.items():
+            if cls not in class_names:
+                st.sidebar.markdown(f"- **{cls}**: {desc}")
+
+st.sidebar.markdown("---")
+
+
 # --- Distribución de clases ---
 st.sidebar.subheader("Distribución de la Variable Objetivo")
 
