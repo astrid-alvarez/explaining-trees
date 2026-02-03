@@ -203,18 +203,18 @@ st.sidebar.markdown(
                 padding:10px 14px;
                 border-radius:8px;
                 color:black;
-                font-size:0.9rem;
-                border: 1px solid #e0e0e0;
-                line-height:1.25;">
+                font-size:0.8rem;
+                border: 1px solid #e0e0e0;">
         <b>Descripción:</b> {info_texto['desc']}<br/>
-        <b>Variable objetivo:</b> {info_texto['target']}<br/>
         <b>Registros:</b> {total_registros_reales}<br/>
         <b>Variables:</b> {total_variables}<br/>
-        <b>Categorías de variables:</b> {tipos_texto}
+        <b>Categorías de variables:</b> {tipos_texto}<br/>
+        <b>Variable objetivo:</b> {info_texto['target']}
     </div>
     """,
     unsafe_allow_html=True
 )
+
 
 
 # --- Distribución de clases ---
