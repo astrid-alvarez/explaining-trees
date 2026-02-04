@@ -1056,14 +1056,14 @@ with col2:
     tree_ = modelo.tree_
     cidx = idx_objetivo
 
-    if modo_arbol.startswith("Modo NO estricto"):
+    if modo_arbol.startswith("Modo NO ESTRICTO"):
         keep_mask = _keep_mask_non_strict(
             tree_,
             cidx,
             tau,
             min_samples_to_keep=soporte_absoluto
         )
-        st.caption(f"Modo no estricto: nodos_keep={int(keep_mask.sum())}")
+        st.caption(f"Modo NO ESTRICTO: nodos_keep={int(keep_mask.sum())}")
 
         if keep_mask.any():
             g = build_compacted_graphviz_non_strict(
