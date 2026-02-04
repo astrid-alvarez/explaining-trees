@@ -982,7 +982,7 @@ with col1:
         "Tipo de Árbol",
         (
             "Modo NO ESTRICTO (Original/Exploratorio)",
-            "Modo ESTRICTO (Monotonía probabilística)"
+            "Modo ESTRICTO ( + Monotonía probabilística)"
         ),
         index=0
     )
