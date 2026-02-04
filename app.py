@@ -981,7 +981,7 @@ with col1:
     modo_arbol = st.radio(
         "Tipo de Árbol",
         (
-            "Modo NO estricto (Original/Exploratorio)",
+            "Modo NO ESTRICTO (Original/Exploratorio)",
             "Modo ESTRICTO (Monotonía probabilística)"
         ),
         index=0
@@ -991,7 +991,7 @@ with col1:
         st.markdown(
             """
             <div style="font-size:0.80rem; line-height:1.25;">
-            <b>Modo NO estricto:</b> muestra reglas que cumplen los umbrales.<br/>
+            <b>Modo NO ESTRICTO:</b> muestra reglas que cumplen los umbrales.<br/>
             <b>Modo ESTRICTO:</b> además exige que la probabilidad de la clase no baje en el camino.<br/><br/>
            
             </div>
