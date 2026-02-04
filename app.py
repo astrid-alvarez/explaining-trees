@@ -976,8 +976,8 @@ with col1:
         unsafe_allow_html=True
     )
 
-    st.markdown("### 3. Filtros de Simplificación") #------------------------------------------------------------
-    
+    st.markdown("### 3. Filtros de Simplificación")
+
     modo_arbol = st.radio(
         "Tipo de Árbol",
         (
@@ -986,7 +986,7 @@ with col1:
         ),
         index=0
     )
-    
+
     with st.expander("ℹ️ Ayuda rápida", expanded=False):
         st.markdown(
             """
@@ -998,27 +998,45 @@ with col1:
             </div>
             """,
             unsafe_allow_html=True
-       )
+        )
 
-    
+    confianza_pct = st.number_input(
+        "Confianza Mínima (%)",
+        min_value=0,
+        max_value=100,
+        value=90,
+        step=5
+    )
+
+    soporte_pct = st.number_input(
+        "Soporte Mínimo (% Total)",
+        min_value=0.1,
+        max_value=50.0,
+        value=1.5,
+        step=0.5,
+        format="%.2f"
+    )
+
     soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
     if soporte_absoluto < 1:
         soporte_absoluto = 1
-    
+
     st.caption(f"Soporte absoluto: {soporte_absoluto} muestras.")
-    
+
     with st.expander("¿Cómo influyen estos filtros en el árbol?", expanded=False):
         st.markdown(
             """
-            - **Aumentar la confianza** reduce el número de reglas mostradas y prioriza precisión.
-            - **Aumentar el soporte** elimina reglas poco representativas.
-            - **Modo ESTRICTO** puede podar ramas donde la probabilidad de la clase disminuye,
+            <div style="font-size:0.80rem; line-height:1.25;">
+            - <b>Aumentar la confianza</b> reduce el número de reglas mostradas y prioriza precisión.<br/>
+            - <b>Aumentar el soporte</b> elimina reglas poco representativas.<br/>
+            - <b>Modo ESTRICTO</b> puede podar ramas donde la probabilidad de la clase disminuye,
               generando explicaciones más consistentes pero menos detalladas.
-            """
+            </div>
+            """,
+            unsafe_allow_html=True
         )
-    
-    tau = confianza_pct / 100.0
 
+    tau = confianza_pct / 100.0
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA DERECHA (COMPARACIÓN + ÁRBOL)
 # -----------------------------------------------------------------------------
