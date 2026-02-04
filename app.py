@@ -446,7 +446,19 @@ st.sidebar.markdown(
     """,
     unsafe_allow_html=True
 )
+with st.sidebar.expander("ℹ️ ¿Cómo interpretar este diagnóstico?"):
+    st.markdown(
+        """
+        - **Reglas Potenciales**: número de reglas (hojas del árbol) que pueden explicar la clase seleccionada. 
+          Un valor alto indica mayor diversidad de patrones; un valor bajo sugiere explicaciones más concentradas.
 
+        - **Confianza Máx**: máxima probabilidad alcanzada por una regla para predecir la clase seleccionada. 
+          Refleja el mayor nivel de certeza local del modelo, no el desempeño global.
+
+        - **Soporte Máx**: número máximo de instancias cubiertas por una sola regla de la clase. 
+          Indica cuán representativa es la regla más fuerte; valores bajos pueden implicar reglas muy específicas.
+        """
+    )
 # -----------------------------------------------------------------------------
 # FUNCIONES AUXILIARES (BASADAS EN PARTE 13)  -- LÓGICA DE LOS ÁRBOLES
 # -----------------------------------------------------------------------------
