@@ -987,37 +987,19 @@ with col1:
         index=0
     )
     
-    st.caption(
-        "• **Modo NO estricto**: conserva todas las reglas que cumplen los umbrales de confianza y soporte.\n"
-        "• **Modo ESTRICTO**: además exige que la probabilidad de la clase **no disminuya** a lo largo del camino del árbol."
+    with st.expander("ℹ️ Ayuda rápida", expanded=False):
+    st.markdown(
+        """
+        <div style="font-size:0.80rem; line-height:1.25;">
+        <b>Modo NO estricto:</b> conserva reglas que cumplen confianza y soporte.<br/>
+        <b>Modo ESTRICTO:</b> además exige que p(clase) no disminuya en el camino.<br/><br/>
+        <b>Confianza mínima:</b> umbral de p(clase) en la regla (más alto → más precisión, menos cobertura).<br/>
+        <b>Soporte mínimo:</b> % mínimo de registros cubiertos (más alto → menos reglas específicas).<br/>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
-    
-    confianza_pct = st.number_input(
-        "Confianza Mínima (%)",
-        min_value=0,
-        max_value=100,
-        value=90,
-        step=5
-    )
-    
-    st.caption(
-        "Probabilidad mínima requerida para la clase objetivo en una regla. "
-        "Valores altos generan explicaciones más **precisas**, pero con menor **cobertura**."
-    )
-    
-    soporte_pct = st.number_input(
-        "Soporte Mínimo (% Total)",
-        min_value=0.1,
-        max_value=50.0,
-        value=1.5,
-        step=0.5,
-        format="%.2f"
-    )
-    
-    st.caption(
-        "Porcentaje mínimo de registros que debe cubrir una regla. "
-        "Soportes bajos pueden producir reglas muy específicas (riesgo de sobreajuste)."
-    )
+
     
     soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
     if soporte_absoluto < 1:
