@@ -456,7 +456,7 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 st.sidebar.markdown("")
-with st.sidebar.expander("ℹ️ ¿Cómo interpretar este diagnóstico?"):
+with st.sidebar.expander("¿Cómo interpretar este diagnóstico?"):
     st.markdown(
         """
         <div style="font-size:0.85rem; line-height:1.4;">
@@ -986,7 +986,7 @@ with col1:
         index=0
     )
 
-    with st.expander("ℹ️ Guía rápida de filtros", expanded=False):
+    with st.expander("Guía rápida de filtros", expanded=False):
         st.markdown(
             """
             <div style="font-size:0.80rem; line-height:1.25;">
