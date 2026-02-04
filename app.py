@@ -453,10 +453,8 @@ with st.sidebar.expander("ℹ️ ¿Cómo interpretar este diagnóstico?"):
         <div style="font-size:0.85rem; line-height:1.4;">
         <b>Reglas potenciales:</b> número de hojas del árbol que predicen esta clase. 
         Un valor alto indica mayor complejidad de la explicación.<br/><br/>
-
         <b>Confianza máxima:</b> probabilidad más alta alcanzada por la clase en alguna regla.
         Valores muy altos pueden indicar reglas muy específicas.<br/><br/>
-
         <b>Soporte máximo:</b> número máximo de instancias cubiertas por una regla.
         Soportes bajos implican mayor riesgo de sobreajuste.
         </div>
