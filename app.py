@@ -446,6 +446,7 @@ st.sidebar.markdown(
     """,
     unsafe_allow_html=True
 )
+
 with st.sidebar.expander("ℹ️ ¿Cómo interpretar este diagnóstico?"):
     st.markdown(
         """
