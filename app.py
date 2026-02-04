@@ -1084,7 +1084,7 @@ with col2:
             tau,
             min_samples_to_keep=soporte_absoluto
         )
-        st.caption(f"Modo estricto: nodos_keep={int(keep_mask.sum())}")
+        st.caption(f"Modo ESTRICTO: nodos_keep={int(keep_mask.sum())}")
 
         if keep_mask.any():
             g = build_compacted_graphviz_strict(
