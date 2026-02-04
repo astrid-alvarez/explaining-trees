@@ -729,7 +729,7 @@ def build_compacted_graphviz_non_strict(modelo, clase, tau, soporte,
             "dpi": "300",
             "label": (
                 f"Clase: {clase} | Confianza: τ={tau:.2f} | "
-                f"Soporte: ≥{soporte} muestras | ÁRBOL COMPACTADO (NO ESTRICTO)"
+                f"Soporte: ≥{soporte} muestras | ÁRBOL COMPACTO (NO ESTRICTO)"
             ),
             "labelloc": "t",
         },
@@ -863,7 +863,7 @@ def build_compacted_graphviz_strict(modelo, clase, tau, soporte,
             "label": (
                 f"Clase: {clase} | Confianza: τ={tau:.2f} | "
                 f"Soporte: ≥{soporte} muestras | "
-                f"ÁRBOL COMPACTADO (MONOTONÍA ESTRICTA)"
+                f"ÁRBOL COMPACTO (MONOTONÍA ESTRICTA)"
             ),
             "labelloc": "t",
         },
