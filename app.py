@@ -281,15 +281,24 @@ if extra is not None:
 
     if len(clases_sig) > 0:
         with st.sidebar.expander("¿Qué representa cada clase?", expanded=False):
-            for cls in class_names:
-                if cls in clases_sig:
-                    st.markdown(f"- **{cls}**: {clases_sig[cls]}")
+            st.markdown(
+                """
+                <div style="font-size:0.85rem; line-height:1.4;">
+                """ +
+                "".join(
+                    f"<b>{cls}:</b> {clases_sig[cls]}<br/>"
+                    for cls in class_names if cls in clases_sig
+                ) +
+                "".join(
+                    f"<b>{cls}:</b> {desc}<br/>"
+                    for cls, desc in clases_sig.items() if cls not in class_names
+                ) +
+                """
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-            for cls, desc in clases_sig.items():
-                if cls not in class_names:
-                    st.markdown(f"- **{cls}**: {desc}")
-
-if y_test is not None:
 
     # ================================
     # 1) Conteos globales (train + test)
