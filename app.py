@@ -998,7 +998,7 @@ with col1:
             </div>
             """,
             unsafe_allow_html=True
-        )
+       )
 
     
     soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
