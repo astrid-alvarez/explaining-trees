@@ -993,8 +993,7 @@ with col1:
             <div style="font-size:0.80rem; line-height:1.25;">
             <b>Modo NO estricto:</b> muestra reglas que cumplen los umbrales.<br/>
             <b>Modo ESTRICTO:</b> además exige que la probabilidad de la clase no baje en el camino.<br/><br/>
-            <b>Confianza mínima:</b> más alto → reglas más precisas, menos cobertura.<br/>
-            <b>Soporte mínimo:</b> más alto → elimina reglas muy específicas (menos sobreajuste).<br/>
+           
             </div>
             """,
             unsafe_allow_html=True
