@@ -1024,19 +1024,7 @@ with col1:
 
     st.caption(f"Soporte absoluto: {soporte_absoluto} muestras.")
 
-    with st.expander("¿Cómo influyen estos filtros en el árbol?", expanded=False):
-        st.markdown(
-            """
-            <div style="font-size:0.80rem; line-height:1.25;">
-            - <b>Aumentar la confianza</b> reduce el número de reglas mostradas y prioriza precisión.<br/>
-            - <b>Aumentar el soporte</b> elimina reglas poco representativas.<br/>
-            - <b>Modo ESTRICTO</b> puede podar ramas donde la probabilidad de la clase disminuye,
-              generando explicaciones más consistentes pero menos detalladas.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
+    
     tau = confianza_pct / 100.0
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA DERECHA (COMPARACIÓN + ÁRBOL)
