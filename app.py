@@ -357,7 +357,7 @@ if extra is not None:
         ax.set_xticks(range(len(etiquetas)))
         ax.set_xticklabels(etiquetas, rotation=45, ha='right', fontsize=10)
 
-        ax.set_ylabel("Porcentaje de instancias (%)", fontsize=9)
+        ax.set_ylabel("Porcentaje de registros (%)", fontsize=9)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
 
@@ -464,7 +464,7 @@ with st.sidebar.expander("ℹ️ ¿Cómo interpretar este diagnóstico?"):
         Un valor alto indica mayor complejidad de la explicación.<br/><br/>
         <b>Confianza máxima:</b> probabilidad más alta alcanzada por la clase en alguna regla.
         Valores muy altos pueden indicar reglas muy específicas.<br/><br/>
-        <b>Soporte máximo:</b> número máximo de instancias cubiertas por una regla.
+        <b>Soporte máximo:</b> número máximo de registros cubiertos por una regla.
         Soportes bajos implican mayor riesgo de sobreajuste.
         </div>
         """,
