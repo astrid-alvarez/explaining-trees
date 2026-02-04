@@ -988,17 +988,17 @@ with col1:
     )
     
     with st.expander("ℹ️ Ayuda rápida", expanded=False):
-    st.markdown(
-        """
-        <div style="font-size:0.80rem; line-height:1.25;">
-        <b>Modo NO estricto:</b> conserva reglas que cumplen confianza y soporte.<br/>
-        <b>Modo ESTRICTO:</b> además exige que p(clase) no disminuya en el camino.<br/><br/>
-        <b>Confianza mínima:</b> umbral de p(clase) en la regla (más alto → más precisión, menos cobertura).<br/>
-        <b>Soporte mínimo:</b> % mínimo de registros cubiertos (más alto → menos reglas específicas).<br/>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        st.markdown(
+            """
+            <div style="font-size:0.80rem; line-height:1.25;">
+            <b>Modo NO estricto:</b> conserva reglas que cumplen confianza y soporte.<br/>
+            <b>Modo ESTRICTO:</b> además exige que p(clase) no disminuya en el camino.<br/><br/>
+            <b>Confianza mínima:</b> umbral de p(clase) en la regla (más alto → más precisión, menos cobertura).<br/>
+            <b>Soporte mínimo:</b> % mínimo de registros cubiertos (más alto → menos reglas específicas).<br/>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     
     soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
