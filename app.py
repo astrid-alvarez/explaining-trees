@@ -70,7 +70,7 @@ INFO_BDS = {
 }
 
 # -----------------------------------------------------------------------------
-# NUEVO: Información contextual adicional (Sección 1)
+# Información contextual adicional (Sección 1)
 # - Tipos de atributos
 # - Significado de clases de la variable objetivo
 # -----------------------------------------------------------------------------
@@ -228,12 +228,12 @@ num_clases = len(raw_classes)
 info_texto = INFO_BDS.get(nombre_bd, {"desc": "Sin descripción", "target": "N/A"})
 
 # -----------------------------------------------------------------------------
-# CÓDIGO ACTUALIZADO: CORRECCIÓN DE VARIABLES
+# CORRECCIÓN DE VARIABLES
 # -----------------------------------------------------------------------------
 # 1. Recuperar tamaño de entrenamiento desde el árbol (dato oculto en sklearn)
 n_train = int(modelo.tree_.n_node_samples[0])
 
-# 2. Definir la variable vital para el resto del código (NO BORRAR)
+# 2. Definir la variable vital para el resto del código
 total_registros = len(X_test)  
 # 3. Calcular el total real SOLO para la visualización en la tarjeta
 total_registros_reales = n_train + total_registros
@@ -663,16 +663,16 @@ st.sidebar.markdown(
 
 # --- (A) Advertencia automática por bajo soporte (riesgo de sobreajuste) ---
 # Umbral simple: si la mejor regla cubre muy poco del total, avisar.
-umbral_pct_bajo = 1.0  # 1% del total (puedes cambiarlo a 0.5 o 2.0 si quieres)
+umbral_pct_bajo = 1.0  # 1% del total (se puede cambiar a 0.5 o 2.0 )
 if sup_max_pct > 0 and sup_max_pct < umbral_pct_bajo:
     st.sidebar.warning(
-        f"⚠️ Esta clase tiene reglas muy específicas: el soporte máximo es {sup_max_pct:.1f}% "
+        f"Esta clase tiene reglas muy específicas: el soporte máximo es {sup_max_pct:.1f}% "
         f"del total. Podría haber mayor riesgo de sobreajuste."
     )
 
 # --- Expander de interpretación (mismo tamaño de letra y espaciado consistente) ---
 st.sidebar.markdown("")  # espacio pequeño
-with st.sidebar.expander("ℹ️ ¿Cómo interpretar este diagnóstico?", expanded=False):
+with st.sidebar.expander("¿Cómo interpretar este diagnóstico?", expanded=False):
     st.markdown(
         """
         <div style="font-size:0.80rem; line-height:1.25;">
@@ -1241,7 +1241,7 @@ with col1:
         st.session_state["bd_prev"] = nombre_bd
         st.session_state["cls_prev"] = idx_objetivo
 
-    # 🔽 Inputs SIEMPRE (sin value= para evitar warning por session_state)
+    # Inputs SIEMPRE (sin value= para evitar warning por session_state)
     st.number_input(
         "Confianza Mínima (%)",
         min_value=0,
@@ -1259,11 +1259,11 @@ with col1:
         key="soporte_pct"
     )
 
-    # 🔽 Leer valores finales desde session_state
+    #  Leer valores finales desde session_state
     confianza_pct = float(st.session_state["confianza_pct"])
     soporte_pct = float(st.session_state["soporte_pct"])
 
-    # 🔽 Cálculos DENTRO de col1 (siempre definidos)
+    #  Cálculos DENTRO de col1 (siempre definidos)
     soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
     if soporte_absoluto < 1:
         soporte_absoluto = 1
@@ -1332,7 +1332,7 @@ with col2:
                 )
         else:
             st.warning(
-                f"⚠️ No se encontró la imagen '{nombre_imagen_global}'. "
+                f"No se encontró la imagen '{nombre_imagen_global}'. "
                 f"Asegúrate de tenerla en la carpeta."
             )
 
@@ -1395,31 +1395,6 @@ with col2:
    
     if g is not None:
         mostrar_dot_en_streamlit(g)
-    else:
-        st.info(
-            "No se generó un árbol especialista con los filtros actuales. "
-            "Revisa la sección «Selección de Clase» para ver el diagnóstico."
-        )
+    
 
-# -----------------------------------------------------------------------------
-# 4. EVALUACIÓN DEL EXPERTO
-# -----------------------------------------------------------------------------
-st.divider()
-st.subheader("4. Evaluación del experto")
 
-c1, c2 = st.columns(2)
-
-with c1:
-    st.select_slider(
-        "Comprensibilidad",
-        ["1 (Baja)", "2", "3", "4", "5 (Alta)"]
-    )
-
-with c2:
-    st.select_slider(
-        "Utilidad para Toma de Decisiones",
-        ["1 (Baja)", "2", "3", "4", "5 (Alta)"]
-    )
-
-if st.button("Guardar Evaluación"):
-    st.success("Evaluación registrada correctamente.")
