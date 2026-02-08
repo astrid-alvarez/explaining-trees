@@ -20,19 +20,15 @@ import streamlit.components.v1 as components
 def mostrar_dot_en_streamlit(dot, height=820):
     """
     Renderiza un graphviz.Digraph en SVG (evita bitmap gigante/cairo/PIL).
-    Si falla, intenta PNG como fallback.
+    Sin fallback a PNG para evitar DecompressionBomb.
     """
     try:
         svg_bytes = dot.pipe(format="svg")
         components.html(svg_bytes.decode("utf-8"), height=height, scrolling=True)
     except Exception as e_svg:
-        try:
-            png_bytes = dot.pipe(format="png")
-            st.image(png_bytes, use_container_width=True)
-        except Exception as e_png:
-            st.error("No se pudo renderizar el árbol (demasiado grande o excede límites del servidor).")
-            st.caption(f"Detalle SVG: {e_svg}")
-            st.caption(f"Detalle PNG: {e_png}")
+        st.error("No se pudo renderizar el árbol en SVG (posiblemente demasiado grande).")
+        st.caption(f"Detalle: {e_svg}")
+
 
 # -----------------------------------------------------------------------------
 # CONFIGURACIÓN Y ESTILOS
@@ -1471,11 +1467,29 @@ with col2:
         nombre_imagen_global = f"ARBOL_GENERALIZADO_{prefijo_bd}.png"
 
         if os.path.exists(nombre_imagen_global):
-            st.image(
-                nombre_imagen_global,
-                caption=f"Modelo Generalizado - {prefijo_bd}",
-                use_container_width=True
-            )
+            # Mostrar imagen SOLO si Streamlit/PIL la puede abrir sin reventar
+            try:
+                st.image(
+                    nombre_imagen_global,
+                    caption=f"Modelo Generalizado - {prefijo_bd}",
+                    use_container_width=True
+                )
+            except Exception as e_img:
+                st.warning(
+                    "La imagen del Árbol Generalizado es demasiado grande para visualizarla aquí "
+                    "(límite de seguridad del servidor). Puedes descargarla abajo."
+                )
+                st.caption(f"Detalle: {e_img}")
+        
+            # Descarga (esto no intenta decodificar la imagen)
+            with open(nombre_imagen_global, "rb") as f:
+                st.download_button(
+                    "⬇️ Descargar Árbol Generalizado (PNG)",
+                    data=f.read(),
+                    file_name=nombre_imagen_global,
+                    mime="image/png"
+                )
+
 
             with open(nombre_imagen_global, "rb") as f:
                 st.download_button(
@@ -1490,20 +1504,22 @@ with col2:
                 f"Asegúrate de tenerla en la carpeta."
             )
 
-    # -----------------------------
-    # Árbol especialista
-    # -----------------------------
-    st.subheader("🌳 Árbol Especialista Generado")
-    
+# -----------------------------
+# Árbol especialista
+# -----------------------------
+st.subheader("🌳 Árbol Especialista Generado")
+
+try:
     tree_ = modelo.tree_
     cidx = idx_objetivo
-    
+
     # Recuperar keep_mask calculado en col1
     keep_mask = st.session_state.get("keep_mask_especialista", None)
-    
+
     # Condición de modo
     modo_no_estricto = ("no estricto" in modo_arbol.lower())
-    
+
+    # Construcción del grafo SOLO si hay nodos keep
     if keep_mask is not None and keep_mask.any():
         if modo_no_estricto:
             g = build_compacted_graphviz_non_strict(
@@ -1529,7 +1545,7 @@ with col2:
             )
     else:
         g = None
-    
+
     # Render seguro del árbol
     if g is not None:
         n_nodos = int(keep_mask.sum())
@@ -1545,6 +1561,14 @@ with col2:
             mostrar_dot_en_streamlit(g)
     else:
         st.info("Con los filtros actuales no se generó un árbol especialista (no hay reglas que cumplan).")
+
+except Exception as e:
+    st.error("Se produjo un error al construir/renderizar el árbol especialista.")
+    st.exception(e)
+    st.stop()
+
+
+   
 
 
 
