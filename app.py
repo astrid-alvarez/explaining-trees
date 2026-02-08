@@ -1303,7 +1303,7 @@ with col2:
         f"Resumen del árbol: profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}."
     )
     if max_depth >= 12:
-        st.info("Árbol profundo: puede ser difícil de leer ampliando, descarga el Árbol Generalizado en PNG.")
+        st.info("Árbol profundo: puede ser difícil de leer ampliando, descarga el Árbol Generalizado (PNG).")
 
     # -----------------------------
     # Árbol generalizado (comparación) + descarga PNG
