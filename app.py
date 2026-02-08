@@ -1435,6 +1435,17 @@ with col2:
                 f"No se encontró la imagen '{nombre_imagen_global}'. "
                 f"Asegúrate de tenerla en la carpeta."
             )
+            
+    # Guardar variables influyentes para mostrarlas en col1
+    if keep_mask is not None and keep_mask.any():
+        st.session_state["top_vars_especialista"] = top_variables_influyentes(
+            tree_=tree_,
+            keep_mask=keep_mask,
+            feature_names=feat_names,
+            topk=5
+        )
+    else:
+        st.session_state["top_vars_especialista"] = []
 
     # -----------------------------
     # Árbol especialista
@@ -1522,7 +1533,8 @@ with col2:
         )
     else:
         st.session_state["top_vars_especialista"] = []
-    empty()
+  #  st.empty()
+
 
    
     if g is not None:
