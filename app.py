@@ -1255,6 +1255,7 @@ with col1:
         st.session_state["soporte_pct"] = sop_sug
         st.session_state["bd_prev"] = nombre_bd
         st.session_state["cls_prev"] = idx_objetivo
+         st.session_state["top_vars_especialista"] = []
         st.session_state["keep_mask_especialista"] = None   # Reset para que NO se hereden variables influyentes de otra BD/clase
 
     # Inputs SIEMPRE (sin value= para evitar warning por session_state)
@@ -1285,6 +1286,46 @@ with col1:
     tau = float(st.session_state.get("tau_actual", confianza_pct / 100.0))
     
     st.caption(f"Soporte absoluto: {soporte_absoluto} muestras.")
+    
+    # -----------------------------
+    # Calcular keep_mask + variables influyentes (AQUÍ, en col1)
+    # -----------------------------
+    tree_ = modelo.tree_
+    cidx = idx_objetivo
+    keep_mask = st.session_state.get("keep_mask_especialista", None)
+
+    modo_no_estricto = ("no estricto" in modo_arbol.lower())
+    
+    if modo_no_estricto:
+        keep_mask = _keep_mask_non_strict(
+            tree_,
+            cidx,
+            tau,
+            min_samples_to_keep=soporte_absoluto
+        )
+    else:
+        keep_mask = _keep_mask_strict_monotonic(
+            tree_,
+            cidx,
+            tau,
+            min_samples_to_keep=soporte_absoluto
+        )
+    
+    # Guardar SIEMPRE para que col2 lo reutilice
+    st.session_state["keep_mask_especialista"] = keep_mask
+    
+    # Variables influyentes (solo si hay árbol)
+    if keep_mask is not None and keep_mask.any():
+        st.session_state["top_vars_especialista"] = top_variables_influyentes(
+            tree_=tree_,
+            keep_mask=keep_mask,
+            feature_names=feat_names,
+            topk=5
+        )
+    else:
+        st.session_state["top_vars_especialista"] = []
+    
+        
     
     # -----------------------------
     # Variables más influyentes (árbol especialista)
@@ -1431,80 +1472,49 @@ with col2:
                 f"Asegúrate de tenerla en la carpeta."
             )
 
-    # -----------------------------
-    # Árbol especialista
-    # -----------------------------
-    st.subheader("🌳 Árbol Especialista Generado")
+# -----------------------------
+# Árbol especialista
+# -----------------------------
+st.subheader("🌳 Árbol Especialista Generado")
 
-    tree_ = modelo.tree_
-    cidx = idx_objetivo
+tree_ = modelo.tree_
+cidx = idx_objetivo
 
-    modo_no_estricto = ("no estricto" in modo_arbol.lower()) or (
-        "no" in modo_arbol.lower() and "estrict" in modo_arbol.lower()
-    )
+# Recuperar keep_mask calculado en col1
+keep_mask = st.session_state.get("keep_mask_especialista", None)
 
+# Condición de modo
+modo_no_estricto = ("no estricto" in modo_arbol.lower())
+
+if keep_mask is not None and keep_mask.any():
     if modo_no_estricto:
-        keep_mask = _keep_mask_non_strict(
-            tree_,
-            cidx,
-            tau,
-            min_samples_to_keep=soporte_absoluto
-        )
-        st.caption(f"Modo NO estricto: nodos_keep={int(keep_mask.sum())}")
-
-        if keep_mask.any():
-            g = build_compacted_graphviz_non_strict(
-                modelo=modelo,
-                clase=class_names[cidx],
-                tau=tau,
-                soporte=soporte_absoluto,
-                keep_mask=keep_mask,
-                feature_names=feat_names,
-                class_names_list=class_names,
-                color_clase=color_clase_hex
-            )
-        else:
-            g = None
-
-    else:
-        keep_mask = _keep_mask_strict_monotonic(
-            tree_,
-            cidx,
-            tau,
-            min_samples_to_keep=soporte_absoluto
-        )
-        st.caption(f"Modo ESTRICTO: nodos_keep={int(keep_mask.sum())}")
-
-        if keep_mask.any():
-            g = build_compacted_graphviz_strict(
-                modelo=modelo,
-                clase=class_names[cidx],
-                tau=tau,
-                soporte=soporte_absoluto,
-                keep_mask=keep_mask,
-                feature_names=feat_names,
-                class_names_list=class_names,
-                color_clase=color_clase_hex
-            )
-        else:
-            g = None
-
-    #  Guardar keep_mask y variables influyentes (DESPUÉS de calcular keep_mask)
-    st.session_state["keep_mask_especialista"] = keep_mask
-
-    if keep_mask is not None and keep_mask.any():
-        st.session_state["top_vars_especialista"] = top_variables_influyentes(
-            tree_=tree_,
+        g = build_compacted_graphviz_non_strict(
+            modelo=modelo,
+            clase=class_names[cidx],
+            tau=tau,
+            soporte=soporte_absoluto,
             keep_mask=keep_mask,
             feature_names=feat_names,
-            topk=5
+            class_names_list=class_names,
+            color_clase=color_clase_hex
         )
     else:
-        st.session_state["top_vars_especialista"] = []
+        g = build_compacted_graphviz_strict(
+            modelo=modelo,
+            clase=class_names[cidx],
+            tau=tau,
+            soporte=soporte_absoluto,
+            keep_mask=keep_mask,
+            feature_names=feat_names,
+            class_names_list=class_names,
+            color_clase=color_clase_hex
+        )
+else:
+    g = None
 
-    # Mostrar árbol si existe
-    if g is not None:
-        mostrar_dot_en_streamlit(g)
+if g is not None:
+    mostrar_dot_en_streamlit(g)
+
 
     
 
