@@ -819,25 +819,17 @@ def _keep_mask_non_strict(tree_, class_idx: int, tau: float,
 from collections import Counter
 
 def top_variables_influyentes(tree_, keep_mask, feature_names, topk=5):
-    """
-    Cuenta variables (features) usadas en los nodos que quedaron en el árbol (keep_mask=True).
-    Retorna lista de tuplas (nombre_variable, conteo).
-    """
     counts = Counter()
-
     for u in range(tree_.node_count):
         if not keep_mask[u]:
             continue
-        # solo nodos internos: hojas no tienen feature útil
         if tree_.children_left[u] == -1:
             continue
         feat_idx = int(tree_.feature[u])
-        if feat_idx is None or feat_idx < 0:
+        if feat_idx < 0 or feat_idx >= len(feature_names):
             continue
-        if feat_idx < len(feature_names):
-            counts[feature_names[feat_idx]] += 1
-
-    return counts.most_common(topk)
+        counts[feature_names[feat_idx]] += 1
+    return [name for name, _ in counts.most_common(topk)]
 
 
 def _get_paths_for_class(tree_, keep):
@@ -1295,8 +1287,19 @@ with col1:
 
     tau = confianza_pct / 100.0
 
-    # Placeholder para mostrar "Variables más influyentes" debajo de los filtros
-    vars_influyentes_ph = st.empty()
+    # -----------------------------
+    # Variables más influyentes (árbol especialista)
+    # -----------------------------
+    top_vars = []
+    if "top_vars_especialista" in st.session_state:
+        top_vars = st.session_state["top_vars_especialista"]
+    
+    st.markdown("**Variables más influyentes (árbol especialista):**")
+    if len(top_vars) == 0:
+        st.caption("—")
+    else:
+        for v in top_vars[:5]:
+            st.markdown(f"- `{v}`")
 
     
     n_ok, conf_ok, sup_ok = diagnostico_con_filtros(
@@ -1505,31 +1508,21 @@ with col2:
             top_vars = _top_features_from_paths(modelo, keep_mask, feat_names, top_k=5)
             top_vars_txt = ", ".join([f"{v}" for v, _ in top_vars]) if top_vars else "—"
 
-            st.info(
-                f"**Resumen automático (árbol especialista):**\n\n"
-                f"• **Regla más fuerte:** confianza ≈ **{hoja_fuerte['p']*100:.1f}%** "
-                f"(soporte = **{hoja_fuerte['sup']}**).\n\n"
-                f"• **Regla más representativa:** soporte = **{hoja_rep['sup']}** "
-                f"(confianza ≈ **{hoja_rep['p']*100:.1f}%**).\n\n"
-                f"• **Variables más influyentes (más usadas en las reglas mostradas):** {top_vars_txt}."
-            )
+           
     # -----------------------------
     # Variables más influyentes (y mostrarlas en col1, debajo de filtros)
     # -----------------------------
+    # Guardar variables influyentes para mostrarlas en col1
     if keep_mask is not None and keep_mask.any():
-        top_vars = top_variables_influyentes(tree_, keep_mask, feat_names, topk=5)
-    
-        with vars_influyentes_ph:
-            st.markdown("**Variables más influyentes (en el árbol especialista):**")
-            if len(top_vars) == 0:
-                st.caption("No fue posible identificar variables (árbol vacío o sin nodos internos).")
-            else:
-                for v, c in top_vars:
-                    st.markdown(f"- `{v}` (aparece {c} veces)")
+        st.session_state["top_vars_especialista"] = top_variables_influyentes(
+            tree_=tree_,
+            keep_mask=keep_mask,
+            feature_names=feat_names,
+            topk=5
+        )
     else:
-        # Si no hay árbol especialista, dejamos vacío el espacio (sin duplicar advertencias)
-        with vars_influyentes_ph:
-            st.empty()
+        st.session_state["top_vars_especialista"] = []
+    empty()
 
    
     if g is not None:
