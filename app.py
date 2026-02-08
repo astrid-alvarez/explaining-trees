@@ -1255,7 +1255,7 @@ with col1:
         st.session_state["soporte_pct"] = sop_sug
         st.session_state["bd_prev"] = nombre_bd
         st.session_state["cls_prev"] = idx_objetivo
-         st.session_state["top_vars_especialista"] = []
+        st.session_state["top_vars_especialista"] = []
         st.session_state["keep_mask_especialista"] = None   # Reset para que NO se hereden variables influyentes de otra BD/clase
 
     # Inputs SIEMPRE (sin value= para evitar warning por session_state)
