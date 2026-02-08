@@ -475,15 +475,27 @@ def diagnostico_reglas_bd(modelo, class_idx, total_muestras, tau, soporte_min_ab
 
 
 
-tau = confianza_pct / 100.0
-soporte_min_abs = int(total_registros * (soporte_pct / 100.0))
-soporte_min_abs = max(1, soporte_min_abs)
+tau_diag = float(st.session_state.get("confianza_pct", 90)) / 100.0
+soporte_pct_diag = float(st.session_state.get("soporte_pct", 1.5))
+soporte_min_abs = max(1, int(total_registros * (soporte_pct_diag / 100.0)))
 
-(reglas_pot, conf_max, sup_confmax,
- sup_max, conf_supmax,
- conf_max_con_soporte, sup_max_con_tau) = diagnostico_reglas_bd(
-    modelo, idx_objetivo, total_registros, tau, soporte_min_abs
+
+(
+    reglas_pot,
+    conf_max,
+    sup_confmax,
+    sup_max,
+    conf_supmax,
+    conf_max_con_soporte,
+    sup_max_con_tau
+) = diagnostico_reglas_bd(
+    modelo,
+    idx_objetivo,
+    total_registros,
+    tau_diag,
+    soporte_min_abs
 )
+
 
 sup_max_pct = (sup_max / total_registros * 100.0) if total_registros > 0 else 0.0
 
@@ -501,7 +513,7 @@ st.sidebar.markdown(
         ▪ <b>Soporte máx (sin filtro):</b> {sup_max} ({sup_max_pct:.1f}%) (p={conf_supmax*100:.1f}%)<br/>
         <hr style="margin:6px 0;"/>
         ▪ <b>Confianza máx con soporte ≥ {soporte_min_abs}:</b> {conf_max_con_soporte*100:.1f}%<br/>
-        ▪ <b>Soporte máx con τ ≥ {tau:.2f}:</b> {sup_max_con_tau}
+        ▪ ▪ <b>Soporte máx con τ ≥ {tau_diag:.2f}:</b> {sup_max_con_tau}
     </div>
     """,
     unsafe_allow_html=True
@@ -1052,21 +1064,23 @@ with col1:
 
 
     confianza_pct = st.number_input(
-        "Confianza Mínima (%)",
-        min_value=0,
-        max_value=100,
-        value=90,
-        step=5
-    )
+    "Confianza Mínima (%)",
+    min_value=0,
+    max_value=100,
+    value=90,
+    step=5,
+    key="confianza_pct"
+)
 
-    soporte_pct = st.number_input(
-        "Soporte Mínimo (% Total)",
-        min_value=0.1,
-        max_value=50.0,
-        value=1.5,
-        step=0.5,
-        format="%.2f"
-    )
+soporte_pct = st.number_input(
+    "Soporte Mínimo (% Total)",
+    min_value=0.1,
+    max_value=50.0,
+    value=1.5,
+    step=0.5,
+    format="%.2f",
+    key="soporte_pct"
+)
 
     soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
     if soporte_absoluto < 1:
