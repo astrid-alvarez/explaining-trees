@@ -407,38 +407,86 @@ idx_objetivo = mapa_idx[clase_elegida]
 color_clase_hex = PALETTE[idx_objetivo % len(PALETTE)]
 
 # --- Diagnóstico de reglas (máximos teóricos para la BD) ---
-def diagnostico_reglas_bd(modelo, class_idx, total_muestras):
+def diagnostico_reglas_bd(modelo, class_idx, total_muestras, tau, soporte_min_abs):
     """
-    Calcula:
-      - número de hojas que predicen la clase objetivo (reglas potenciales),
-      - confianza máxima alcanzable en una hoja de esa clase,
-      - soporte máximo (absoluto y porcentual sobre el total de muestras).
+    Diagnóstico en hojas que predicen class_idx.
+
+    Devuelve:
+      - reglas_pot: # hojas que predicen la clase (sin filtros)
+      - conf_max: máxima p(clase) (sin filtro de soporte)
+      - sup_en_conf_max: soporte de la hoja donde se logra conf_max
+      - soporte_max: máximo soporte (sin filtro de confianza)
+      - conf_en_sup_max: p(clase) en la hoja con soporte_max
+      - conf_max_con_soporte: máxima p(clase) entre hojas con soporte >= soporte_min_abs
+      - soporte_max_con_tau: máximo soporte entre hojas con p(clase) >= tau
     """
     tree_ = modelo.tree_
-    reglas = 0
-    conf_max = 0.0
+    reglas_pot = 0
+
+    conf_max = -1.0
+    sup_en_conf_max = 0
+
     soporte_max = 0
+    conf_en_sup_max = 0.0
+
+    conf_max_con_soporte = -1.0
+    soporte_max_con_tau = 0
 
     for u in range(tree_.node_count):
-        # hoja
-        if tree_.children_left[u] == -1:
-            v = np.asarray(tree_.value[u], dtype=float).reshape(-1)
-            pred = int(np.argmax(v))
-            if pred == class_idx:
-                reglas += 1
-                sup = int(tree_.n_node_samples[u])
-                soporte_max = max(soporte_max, sup)
-                s = v.sum()
-                p = v[class_idx] / s if s > 0 else 0.0
-                conf_max = max(conf_max, float(p))
+        if tree_.children_left[u] != -1:
+            continue  # no hoja
 
-    soporte_pct = (soporte_max / total_muestras * 100.0) if total_muestras > 0 else 0.0
-    return reglas, conf_max, soporte_max, soporte_pct
+        v = np.asarray(tree_.value[u], dtype=float).reshape(-1)
+        pred = int(np.argmax(v))
+        if pred != class_idx:
+            continue
+
+        reglas_pot += 1
+        sup = int(tree_.n_node_samples[u])
+        s = float(v.sum())
+        p = float(v[class_idx] / s) if s > 0 else 0.0
+
+        # Máxima confianza (sin filtro de soporte)
+        if p > conf_max:
+            conf_max = p
+            sup_en_conf_max = sup
+
+        # Máximo soporte (sin filtro de confianza)
+        if sup > soporte_max:
+            soporte_max = sup
+            conf_en_sup_max = p
+
+        # Máxima confianza con soporte mínimo
+        if sup >= soporte_min_abs:
+            conf_max_con_soporte = max(conf_max_con_soporte, p)
+
+        # Máximo soporte con tau
+        if p >= tau:
+            soporte_max_con_tau = max(soporte_max_con_tau, sup)
+
+    if conf_max < 0:
+        conf_max = 0.0
+    if conf_max_con_soporte < 0:
+        conf_max_con_soporte = 0.0
+
+    return (reglas_pot, conf_max, sup_en_conf_max,
+            soporte_max, conf_en_sup_max,
+            conf_max_con_soporte, soporte_max_con_tau)
 
 
-reglas_pot, conf_max, sup_max, sup_max_pct = diagnostico_reglas_bd(
-    modelo, idx_objetivo, total_registros
+
+tau = confianza_pct / 100.0
+soporte_min_abs = int(total_registros * (soporte_pct / 100.0))
+soporte_min_abs = max(1, soporte_min_abs)
+
+(reglas_pot, conf_max, sup_confmax,
+ sup_max, conf_supmax,
+ conf_max_con_soporte, sup_max_con_tau) = diagnostico_reglas_bd(
+    modelo, idx_objetivo, total_registros, tau, soporte_min_abs
 )
+
+sup_max_pct = (sup_max / total_registros * 100.0) if total_registros > 0 else 0.0
+
 
 st.sidebar.subheader("Diagnóstico de Reglas")
 st.sidebar.markdown(
@@ -448,13 +496,17 @@ st.sidebar.markdown(
                 border-radius:8px;
                 color:black;
                 font-size:0.9rem;">
-        <b>Reglas Potenciales:</b> {reglas_pot}<br/>
-        ▪ <b>Confianza Máx:</b> {conf_max*100:.1f}%<br/>
-        ▪ <b>Soporte Máx:</b> {sup_max} ({sup_max_pct:.1f}%)
+        <b>Reglas potenciales:</b> {reglas_pot}<br/>
+        ▪ <b>Confianza máx (sin filtro):</b> {conf_max*100:.1f}% (sup={sup_confmax})<br/>
+        ▪ <b>Soporte máx (sin filtro):</b> {sup_max} ({sup_max_pct:.1f}%) (p={conf_supmax*100:.1f}%)<br/>
+        <hr style="margin:6px 0;"/>
+        ▪ <b>Confianza máx con soporte ≥ {soporte_min_abs}:</b> {conf_max_con_soporte*100:.1f}%<br/>
+        ▪ <b>Soporte máx con τ ≥ {tau:.2f}:</b> {sup_max_con_tau}
     </div>
     """,
     unsafe_allow_html=True
 )
+
 st.sidebar.markdown("")
 with st.sidebar.expander("¿Cómo interpretar este diagnóstico?"):
     st.markdown(
