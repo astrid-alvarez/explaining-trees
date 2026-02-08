@@ -1401,12 +1401,13 @@ with col2:
         else:
             g = None
 
+   
     if g is not None:
         mostrar_dot_en_streamlit(g)
     else:
-        st.warning(
-            f"⚠️ No se encontraron reglas con Confianza >= {confianza_pct}% "
-            f"y Soporte >= {soporte_pct}% para el modo seleccionado."
+        st.info(
+            "No se generó un árbol especialista con los filtros actuales. "
+            "Revisa la sección «Selección de Clase» para ver el diagnóstico."
         )
 
 # -----------------------------------------------------------------------------
