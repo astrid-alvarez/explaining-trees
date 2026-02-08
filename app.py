@@ -670,25 +670,6 @@ if sup_max_pct > 0 and sup_max_pct < umbral_pct_bajo:
         f"del total. Podría haber mayor riesgo de sobreajuste."
     )
 
-# --- (B) Mensaje amigable si con los filtros actuales no habrá reglas ---
-# Tomamos los filtros desde session_state (porque están en la sección 3).
-confianza_actual = float(st.session_state.get("confianza_pct", 90))
-soporte_pct_actual = float(st.session_state.get("soporte_pct", 1.5))
-
-tau_actual = confianza_actual / 100.0
-soporte_abs_actual = int(total_registros * (soporte_pct_actual / 100.0))
-if soporte_abs_actual < 1:
-    soporte_abs_actual = 1
-
-n_ok, conf_ok, sup_ok = diagnostico_con_filtros(modelo, idx_objetivo, tau_actual, soporte_abs_actual)
-
-if n_ok == 0:
-    st.sidebar.info(
-        "Con los filtros actuales no existen reglas que sean simultáneamente "
-        "muy confiables y representativas.\n\n"
-        "Sugerencia: reduce la **Confianza mínima** o el **Soporte mínimo** para explorar más explicaciones."
-    )
-
 # --- Expander de interpretación (mismo tamaño de letra y espaciado consistente) ---
 st.sidebar.markdown("")  # espacio pequeño
 with st.sidebar.expander("ℹ️ ¿Cómo interpretar este diagnóstico?", expanded=False):
@@ -1291,6 +1272,16 @@ with col1:
 
     tau = confianza_pct / 100.0
 
+    n_ok, conf_ok, sup_ok = diagnostico_con_filtros(
+        modelo, idx_objetivo, tau, soporte_absoluto
+    )
+    
+    if n_ok == 0:
+        st.info(
+            "Con los filtros actuales no existen reglas que sean simultáneamente "
+            "muy confiables y representativas.\n\n"
+            "Sugerencia: reduce la **Confianza mínima** o el **Soporte mínimo** para explorar más explicaciones."
+        )
 
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA DERECHA (COMPARACIÓN + ÁRBOL)
