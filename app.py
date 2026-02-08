@@ -38,7 +38,7 @@ def mostrar_dot_en_streamlit(dot, height=820):
 # CONFIGURACIÓN Y ESTILOS
 # -----------------------------------------------------------------------------
 st.set_page_config(page_title="Evaluación XAI", layout="wide")
-MAX_NODOS_RENDER = 300   # umbral seguro para Streamlit Cloud + graphviz/cairo
+MAX_NODOS_RENDER = 200  # umbral seguro para Streamlit Cloud + graphviz/cairo
 PALETTE = [
     "#FF8C00", "#32CD32", "#8A2BE2", "#00BFFF",
     "#FFD700", "#DA70D6", "#40E0D0", "#FFB6C1",
@@ -972,7 +972,7 @@ def build_compacted_graphviz_non_strict(modelo, clase, tau, soporte,
             "rankdir": "TB",
             "splines": "true",
             "fontname": "Helvetica",
-            "dpi": "300",
+            "dpi": "120",
             "label": (
                 f"Clase: {clase} | Confianza: τ={tau:.2f} | "
                 f"Soporte: ≥{soporte} muestras | ÁRBOL COMPACTO (NO ESTRICTO)"
@@ -1105,7 +1105,7 @@ def build_compacted_graphviz_strict(modelo, clase, tau, soporte,
             "rankdir": "TB",
             "splines": "true",
             "fontname": "Helvetica",
-            "dpi": "300",
+            "dpi": "120",
             "label": (
                 f"Clase: {clase} | Confianza: τ={tau:.2f} | "
                 f"Soporte: ≥{soporte} muestras | "
@@ -1287,6 +1287,16 @@ with col1:
    #  Leer valores finales desde session_state (lo que el usuario ve y edita)
     confianza_pct = float(st.session_state["confianza_pct"])
     soporte_pct = float(st.session_state["soporte_pct"])
+
+    # Calcular umbrales reales a partir de los inputs (y guardarlos)
+    soporte_absoluto_calc = int(total_registros * (soporte_pct / 100.0))
+    if soporte_absoluto_calc < 1:
+        soporte_absoluto_calc = 1
+    tau_calc = confianza_pct / 100.0
+
+    st.session_state["soporte_absoluto_actual"] = soporte_absoluto_calc
+    st.session_state["tau_actual"] = tau_calc
+
     
     # ✅ Usar los valores PRECALCULADOS (mismos que se usan para keep_mask y top_vars)
     # (estos los deja el bloque que debes poner antes de col1/col2)
@@ -1520,18 +1530,22 @@ with col2:
     else:
         g = None
     
+    # Render seguro del árbol
     if g is not None:
-    n_nodos = int(keep_mask.sum())
+        n_nodos = int(keep_mask.sum())
 
-    if n_nodos > MAX_NODOS_RENDER:
-        st.warning(
-            f"El árbol especialista tiene {n_nodos} nodos y es demasiado grande para "
-            "renderizarlo de forma segura.\n\n"
-            "Sugerencia: aumenta la **Confianza mínima** o el **Soporte mínimo** "
-            "para simplificar el árbol."
-        )
+        if n_nodos > MAX_NODOS_RENDER:
+            st.warning(
+                f"El árbol especialista tiene {n_nodos} nodos y es demasiado grande para "
+                "renderizarlo de forma segura.\n\n"
+                "Sugerencia: aumenta la **Confianza mínima** o el **Soporte mínimo** "
+                "para simplificar el árbol."
+            )
+        else:
+            mostrar_dot_en_streamlit(g)
     else:
-        mostrar_dot_en_streamlit(g)
+        st.info("Con los filtros actuales no se generó un árbol especialista (no hay reglas que cumplan).")
+
 
 
 
