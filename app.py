@@ -1472,48 +1472,48 @@ with col2:
                 f"Asegúrate de tenerla en la carpeta."
             )
 
-# -----------------------------
-# Árbol especialista
-# -----------------------------
-st.subheader("🌳 Árbol Especialista Generado")
-
-tree_ = modelo.tree_
-cidx = idx_objetivo
-
-# Recuperar keep_mask calculado en col1
-keep_mask = st.session_state.get("keep_mask_especialista", None)
-
-# Condición de modo
-modo_no_estricto = ("no estricto" in modo_arbol.lower())
-
-if keep_mask is not None and keep_mask.any():
-    if modo_no_estricto:
-        g = build_compacted_graphviz_non_strict(
-            modelo=modelo,
-            clase=class_names[cidx],
-            tau=tau,
-            soporte=soporte_absoluto,
-            keep_mask=keep_mask,
-            feature_names=feat_names,
-            class_names_list=class_names,
-            color_clase=color_clase_hex
-        )
+    # -----------------------------
+    # Árbol especialista
+    # -----------------------------
+    st.subheader("🌳 Árbol Especialista Generado")
+    
+    tree_ = modelo.tree_
+    cidx = idx_objetivo
+    
+    # Recuperar keep_mask calculado en col1
+    keep_mask = st.session_state.get("keep_mask_especialista", None)
+    
+    # Condición de modo
+    modo_no_estricto = ("no estricto" in modo_arbol.lower())
+    
+    if keep_mask is not None and keep_mask.any():
+        if modo_no_estricto:
+            g = build_compacted_graphviz_non_strict(
+                modelo=modelo,
+                clase=class_names[cidx],
+                tau=tau,
+                soporte=soporte_absoluto,
+                keep_mask=keep_mask,
+                feature_names=feat_names,
+                class_names_list=class_names,
+                color_clase=color_clase_hex
+            )
+        else:
+            g = build_compacted_graphviz_strict(
+                modelo=modelo,
+                clase=class_names[cidx],
+                tau=tau,
+                soporte=soporte_absoluto,
+                keep_mask=keep_mask,
+                feature_names=feat_names,
+                class_names_list=class_names,
+                color_clase=color_clase_hex
+            )
     else:
-        g = build_compacted_graphviz_strict(
-            modelo=modelo,
-            clase=class_names[cidx],
-            tau=tau,
-            soporte=soporte_absoluto,
-            keep_mask=keep_mask,
-            feature_names=feat_names,
-            class_names_list=class_names,
-            color_clase=color_clase_hex
-        )
-else:
-    g = None
-
-if g is not None:
-    mostrar_dot_en_streamlit(g)
+        g = None
+    
+    if g is not None:
+        mostrar_dot_en_streamlit(g)
 
 
     
