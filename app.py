@@ -1055,39 +1055,41 @@ with col1:
             """
             <div style="font-size:0.80rem; line-height:1.25;">
             <b>Modo NO ESTRICTO:</b> muestra reglas que cumplen los umbrales.<br/>
-            <b>Modo ESTRICTO:</b> además exige que la probabilidad de la clase no baje en el camino.<br/><br/>
-           
+            <b>Modo ESTRICTO:</b> además exige que la probabilidad de la clase no baje en el camino.<br/>
             </div>
             """,
             unsafe_allow_html=True
+        )
+
+    # 🔽 Ambos inputs DENTRO de col1 y alineados
+    confianza_pct = st.number_input(
+        "Confianza Mínima (%)",
+        min_value=0,
+        max_value=100,
+        value=90,
+        step=5,
+        key="confianza_pct"
     )
 
+    soporte_pct = st.number_input(
+        "Soporte Mínimo (% Total)",
+        min_value=0.1,
+        max_value=50.0,
+        value=1.5,
+        step=0.5,
+        format="%.2f",
+        key="soporte_pct"
+    )
 
-    confianza_pct = st.number_input(
-    "Confianza Mínima (%)",
-    min_value=0,
-    max_value=100,
-    value=90,
-    step=5,
-    key="confianza_pct"
-)
+    # 🔽 Cálculo FUERA de cualquier expander, pero DENTRO de col1
+    soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
+    if soporte_absoluto < 1:
+        soporte_absoluto = 1
 
-soporte_pct = st.number_input(
-    "Soporte Mínimo (% Total)",
-    min_value=0.1,
-    max_value=50.0,
-    value=1.5,
-    step=0.5,
-    format="%.2f",
-    key="soporte_pct"
-)
-soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
-if soporte_absoluto < 1:
-    soporte_absoluto = 1
+    st.caption(f"Soporte absoluto: {soporte_absoluto} muestras.")
 
-st.caption(f"Soporte absoluto: {soporte_absoluto} muestras.")
-    
-tau = confianza_pct / 100.0
+    tau = confianza_pct / 100.0
+
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA DERECHA (COMPARACIÓN + ÁRBOL)
 # -----------------------------------------------------------------------------
