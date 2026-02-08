@@ -972,7 +972,7 @@ def build_compacted_graphviz_non_strict(modelo, clase, tau, soporte,
             "rankdir": "TB",
             "splines": "true",
             "fontname": "Helvetica",
-            "dpi": "120",
+            "dpi": "300",
             "label": (
                 f"Clase: {clase} | Confianza: τ={tau:.2f} | "
                 f"Soporte: ≥{soporte} muestras | ÁRBOL COMPACTO (NO ESTRICTO)"
@@ -1105,7 +1105,7 @@ def build_compacted_graphviz_strict(modelo, clase, tau, soporte,
             "rankdir": "TB",
             "splines": "true",
             "fontname": "Helvetica",
-            "dpi": "120",
+            "dpi": "300",
             "label": (
                 f"Clase: {clase} | Confianza: τ={tau:.2f} | "
                 f"Soporte: ≥{soporte} muestras | "
