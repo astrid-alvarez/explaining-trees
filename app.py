@@ -1255,6 +1255,7 @@ with col1:
         st.session_state["soporte_pct"] = sop_sug
         st.session_state["bd_prev"] = nombre_bd
         st.session_state["cls_prev"] = idx_objetivo
+        st.session_state["keep_mask_especialista"] = None   # Reset para que NO se hereden variables influyentes de otra BD/clase
 
     # Inputs SIEMPRE (sin value= para evitar warning por session_state)
     st.number_input(
@@ -1384,8 +1385,6 @@ def _top_features_from_paths(modelo, keep_mask, feature_names, top_k=5):
     orden = sorted(counts.items(), key=lambda x: x[1], reverse=True)
     return orden[:top_k]
 
-
-
 with col2:
     # -----------------------------
     # Resumen del árbol (profundidad/nodos/hojas)
@@ -1422,7 +1421,6 @@ with col2:
                 use_container_width=True
             )
 
-            # Botón de descarga (PNG)
             with open(nombre_imagen_global, "rb") as f:
                 st.download_button(
                     "⬇️ Descargar Árbol Generalizado (PNG)",
@@ -1435,7 +1433,7 @@ with col2:
                 f"No se encontró la imagen '{nombre_imagen_global}'. "
                 f"Asegúrate de tenerla en la carpeta."
             )
-  
+
     # -----------------------------
     # Árbol especialista
     # -----------------------------
@@ -1444,8 +1442,9 @@ with col2:
     tree_ = modelo.tree_
     cidx = idx_objetivo
 
-    # Condición robusta (no depende de mayúsculas/minúsculas exactas)
-    modo_no_estricto = ("no estricto" in modo_arbol.lower()) or ("no" in modo_arbol.lower() and "estrict" in modo_arbol.lower())
+    modo_no_estricto = ("no estricto" in modo_arbol.lower()) or (
+        "no" in modo_arbol.lower() and "estrict" in modo_arbol.lower()
+    )
 
     if modo_no_estricto:
         keep_mask = _keep_mask_non_strict(
@@ -1469,6 +1468,7 @@ with col2:
             )
         else:
             g = None
+
     else:
         keep_mask = _keep_mask_strict_monotonic(
             tree_,
@@ -1491,8 +1491,10 @@ with col2:
             )
         else:
             g = None
-  
-# Guardar variables más influyentes para mostrarlas en col1
+
+    #  Guardar keep_mask y variables influyentes (DESPUÉS de calcular keep_mask)
+    st.session_state["keep_mask_especialista"] = keep_mask
+
     if keep_mask is not None and keep_mask.any():
         st.session_state["top_vars_especialista"] = top_variables_influyentes(
             tree_=tree_,
@@ -1502,10 +1504,11 @@ with col2:
         )
     else:
         st.session_state["top_vars_especialista"] = []
-         
-     
+
+    # Mostrar árbol si existe
     if g is not None:
         mostrar_dot_en_streamlit(g)
+
     
 
 
