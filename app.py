@@ -1435,18 +1435,7 @@ with col2:
                 f"No se encontró la imagen '{nombre_imagen_global}'. "
                 f"Asegúrate de tenerla en la carpeta."
             )
-            
-    # Guardar variables influyentes para mostrarlas en col1
-    if keep_mask is not None and keep_mask.any():
-        st.session_state["top_vars_especialista"] = top_variables_influyentes(
-            tree_=tree_,
-            keep_mask=keep_mask,
-            feature_names=feat_names,
-            topk=5
-        )
-    else:
-        st.session_state["top_vars_especialista"] = []
-
+  
     # -----------------------------
     # Árbol especialista
     # -----------------------------
@@ -1502,28 +1491,8 @@ with col2:
             )
         else:
             g = None
-    # -----------------------------
-    # Resumen automático del árbol especialista (si existe)
-    # -----------------------------
-    if keep_mask is not None and keep_mask.any():
-        hojas = _leaf_stats_for_predicted_class(modelo, cidx, keep_mask=keep_mask)
-
-        if len(hojas) > 0:
-            # Regla más fuerte (mayor confianza p(clase))
-            hoja_fuerte = max(hojas, key=lambda d: d["p"])
-
-            # Regla más representativa (mayor soporte)
-            hoja_rep = max(hojas, key=lambda d: d["sup"])
-
-            # Variables más influyentes (por frecuencia en caminos)
-            top_vars = _top_features_from_paths(modelo, keep_mask, feat_names, top_k=5)
-            top_vars_txt = ", ".join([f"{v}" for v, _ in top_vars]) if top_vars else "—"
-
-           
-    # -----------------------------
-    # Variables más influyentes (y mostrarlas en col1, debajo de filtros)
-    # -----------------------------
-    # Guardar variables influyentes para mostrarlas en col1
+  
+# Guardar variables más influyentes para mostrarlas en col1
     if keep_mask is not None and keep_mask.any():
         st.session_state["top_vars_especialista"] = top_variables_influyentes(
             tree_=tree_,
@@ -1533,10 +1502,8 @@ with col2:
         )
     else:
         st.session_state["top_vars_especialista"] = []
-  #  st.empty()
-
-
-   
+         
+     
     if g is not None:
         mostrar_dot_en_streamlit(g)
     
