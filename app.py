@@ -1286,6 +1286,76 @@ with col1:
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA DERECHA (COMPARACIÓN + ÁRBOL)
 # -----------------------------------------------------------------------------
+def _leaf_stats_for_predicted_class(modelo, class_idx, keep_mask=None):
+    """
+    Recolecta estadísticas de hojas que:
+      - predicen class_idx
+      - y opcionalmente están dentro de keep_mask (si se entrega)
+    Devuelve lista de dicts: {"leaf": u, "p": p_clase, "sup": soporte, "counts": w}
+    """
+    tree_ = modelo.tree_
+    out = []
+
+    for u in range(tree_.node_count):
+        if tree_.children_left[u] != -1:
+            continue  # no hoja
+
+        if keep_mask is not None and (not bool(keep_mask[u])):
+            continue
+
+        w, probs, sup = _node_counts_and_probvec(tree_, u)
+        pred = int(np.argmax(w))
+        if pred != class_idx:
+            continue
+
+        p = float(probs[class_idx]) if probs.size > 0 else 0.0
+        out.append({"leaf": u, "p": p, "sup": int(sup), "counts": w})
+
+    return out
+
+
+def _top_features_from_paths(modelo, keep_mask, feature_names, top_k=5):
+    """
+    Cuenta cuántas veces aparece cada feature en los caminos raíz->hoja (solo nodos keep).
+    Usa el árbol ORIGINAL (tree_.feature) y un parent-array para reconstruir caminos.
+    """
+    tree_ = modelo.tree_
+    n = tree_.node_count
+
+    # parent de cada nodo
+    parent = np.full(n, -1, dtype=int)
+    stack = [0]
+    while stack:
+        u = stack.pop()
+        L, R = int(tree_.children_left[u]), int(tree_.children_right[u])
+        if L != -1:
+            parent[L] = u
+            stack.append(L)
+        if R != -1:
+            parent[R] = u
+            stack.append(R)
+
+    # hojas keep
+    leaves = [u for u in range(n) if tree_.children_left[u] == -1 and bool(keep_mask[u])]
+    if not leaves:
+        return []
+
+    counts = {}
+    for leaf in leaves:
+        u = leaf
+        while u != -1:
+            if bool(keep_mask[u]):
+                feat = int(tree_.feature[u])
+                if feat >= 0 and feat < len(feature_names):
+                    fname = feature_names[feat]
+                    counts[fname] = counts.get(fname, 0) + 1
+            u = parent[u]
+
+    orden = sorted(counts.items(), key=lambda x: x[1], reverse=True)
+    return orden[:top_k]
+
+
+
 with col2:
     # -----------------------------
     # Resumen del árbol (profundidad/nodos/hojas)
@@ -1391,6 +1461,31 @@ with col2:
             )
         else:
             g = None
+    # -----------------------------
+    # Resumen automático del árbol especialista (si existe)
+    # -----------------------------
+    if keep_mask is not None and keep_mask.any():
+        hojas = _leaf_stats_for_predicted_class(modelo, cidx, keep_mask=keep_mask)
+
+        if len(hojas) > 0:
+            # Regla más fuerte (mayor confianza p(clase))
+            hoja_fuerte = max(hojas, key=lambda d: d["p"])
+
+            # Regla más representativa (mayor soporte)
+            hoja_rep = max(hojas, key=lambda d: d["sup"])
+
+            # Variables más influyentes (por frecuencia en caminos)
+            top_vars = _top_features_from_paths(modelo, keep_mask, feat_names, top_k=5)
+            top_vars_txt = ", ".join([f"{v}" for v, _ in top_vars]) if top_vars else "—"
+
+            st.info(
+                f"**Resumen automático (árbol especialista):**\n\n"
+                f"• **Regla más fuerte:** confianza ≈ **{hoja_fuerte['p']*100:.1f}%** "
+                f"(soporte = **{hoja_fuerte['sup']}**).\n\n"
+                f"• **Regla más representativa:** soporte = **{hoja_rep['sup']}** "
+                f"(confianza ≈ **{hoja_rep['p']*100:.1f}%**).\n\n"
+                f"• **Variables más influyentes (más usadas en las reglas mostradas):** {top_vars_txt}."
+            )
 
    
     if g is not None:
