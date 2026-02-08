@@ -1028,8 +1028,27 @@ with col1:
 # PANEL PRINCIPAL: COLUMNA DERECHA (COMPARACIÓN + ÁRBOL)
 # -----------------------------------------------------------------------------
 with col2:
-    # Expander de comparación con árbol generalizado
-   # st.markdown("---")
+    # -----------------------------
+    # Resumen del árbol (profundidad/nodos/hojas)
+    # -----------------------------
+    def resumen_arbol(modelo):
+        t = modelo.tree_
+        n_nodes = int(t.node_count)
+        max_depth = int(t.max_depth)
+        n_leaves = int(np.sum(t.children_left == -1))
+        return max_depth, n_nodes, n_leaves
+
+    max_depth, n_nodes, n_leaves = resumen_arbol(modelo)
+
+    st.caption(
+        f"Resumen del árbol: profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}."
+    )
+    if max_depth >= 12:
+        st.info("Árbol profundo: puede ser difícil de leer ampliando. Usa filtros o descarga el generalizado en PNG.")
+
+    # -----------------------------
+    # Árbol generalizado (comparación) + descarga PNG
+    # -----------------------------
     with st.expander("🆚 Comparar con Árbol Generalizado (Clic para desplegar)", expanded=False):
         st.markdown(f"### Árbol Generalizado Completo: {nombre_bd}")
         st.write("Estructura original completa del modelo global.")
@@ -1043,26 +1062,40 @@ with col2:
                 caption=f"Modelo Generalizado - {prefijo_bd}",
                 use_container_width=True
             )
+
+            # Botón de descarga (PNG)
+            with open(nombre_imagen_global, "rb") as f:
+                st.download_button(
+                    "⬇️ Descargar Árbol Generalizado (PNG)",
+                    data=f.read(),
+                    file_name=nombre_imagen_global,
+                    mime="image/png"
+                )
         else:
             st.warning(
                 f"⚠️ No se encontró la imagen '{nombre_imagen_global}'. "
                 f"Asegúrate de tenerla en la carpeta."
             )
 
-   # st.markdown("---")
+    # -----------------------------
+    # Árbol especialista
+    # -----------------------------
     st.subheader("🌳 Árbol Especialista Generado")
 
     tree_ = modelo.tree_
     cidx = idx_objetivo
 
-    if modo_arbol.startswith("Modo NO ESTRICTO"):
+    # Condición robusta (no depende de mayúsculas/minúsculas exactas)
+    modo_no_estricto = ("no estricto" in modo_arbol.lower()) or ("no" in modo_arbol.lower() and "estrict" in modo_arbol.lower())
+
+    if modo_no_estricto:
         keep_mask = _keep_mask_non_strict(
             tree_,
             cidx,
             tau,
             min_samples_to_keep=soporte_absoluto
         )
-        st.caption(f"Modo NO ESTRICTO: nodos_keep={int(keep_mask.sum())}")
+        st.caption(f"Modo NO estricto: nodos_keep={int(keep_mask.sum())}")
 
         if keep_mask.any():
             g = build_compacted_graphviz_non_strict(
