@@ -1275,25 +1275,21 @@ with col1:
         key="soporte_pct"
     )
 
-    #  Leer valores finales desde session_state
+   #  Leer valores finales desde session_state (lo que el usuario ve y edita)
     confianza_pct = float(st.session_state["confianza_pct"])
     soporte_pct = float(st.session_state["soporte_pct"])
-
-    #  Cálculos DENTRO de col1 (siempre definidos)
-    soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
-    if soporte_absoluto < 1:
-        soporte_absoluto = 1
-
+    
+    # ✅ Usar los valores PRECALCULADOS (mismos que se usan para keep_mask y top_vars)
+    # (estos los deja el bloque que debes poner antes de col1/col2)
+    soporte_absoluto = int(st.session_state.get("soporte_absoluto_actual", 1))
+    tau = float(st.session_state.get("tau_actual", confianza_pct / 100.0))
+    
     st.caption(f"Soporte absoluto: {soporte_absoluto} muestras.")
-
-    tau = confianza_pct / 100.0
-
+    
     # -----------------------------
     # Variables más influyentes (árbol especialista)
     # -----------------------------
-    top_vars = []
-    if "top_vars_especialista" in st.session_state:
-        top_vars = st.session_state["top_vars_especialista"]
+    top_vars = st.session_state.get("top_vars_especialista", [])
     
     st.markdown("**Variables más influyentes (árbol especialista):**")
     if len(top_vars) == 0:
@@ -1301,8 +1297,8 @@ with col1:
     else:
         for v in top_vars[:5]:
             st.markdown(f"- `{v}`")
-
     
+    # Diagnóstico con los mismos umbrales que usaste para construir el árbol especialista
     n_ok, conf_ok, sup_ok = diagnostico_con_filtros(
         modelo, idx_objetivo, tau, soporte_absoluto
     )
@@ -1313,6 +1309,7 @@ with col1:
             "muy confiables y representativas.\n\n"
             "Sugerencia: reduce la **Confianza mínima** o el **Soporte mínimo** para explorar más explicaciones."
         )
+
 
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA DERECHA (COMPARACIÓN + ÁRBOL)
