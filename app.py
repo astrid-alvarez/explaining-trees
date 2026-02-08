@@ -500,6 +500,77 @@ soporte_min_abs = max(1, int(total_registros * (soporte_pct_diag / 100.0)))
 sup_max_pct = (sup_max / total_registros * 100.0) if total_registros > 0 else 0.0
 
 
+# -------------------------------------------------------------------------
+# 2) Diagnóstico de reglas (UI simple + advertencia automática)
+# -------------------------------------------------------------------------
+def diagnostico_reglas_bd(modelo, class_idx, total_muestras):
+    """
+    Diagnóstico "global" (sin filtros):
+    - reglas potenciales: hojas que predicen la clase
+    - confianza máxima: mayor p(clase) en alguna hoja de esa clase
+    - soporte máximo: mayor cantidad de muestras en alguna hoja de esa clase
+    """
+    tree_ = modelo.tree_
+    reglas = 0
+    conf_max = 0.0
+    soporte_max = 0
+
+    for u in range(tree_.node_count):
+        if tree_.children_left[u] == -1:  # hoja
+            v = np.asarray(tree_.value[u], dtype=float).reshape(-1)
+            pred = int(np.argmax(v))
+            if pred == class_idx:
+                reglas += 1
+                sup = int(tree_.n_node_samples[u])
+                soporte_max = max(soporte_max, sup)
+                s = v.sum()
+                p = (v[class_idx] / s) if s > 0 else 0.0
+                conf_max = max(conf_max, float(p))
+
+    soporte_pct = (soporte_max / total_muestras * 100.0) if total_muestras > 0 else 0.0
+    return reglas, conf_max, soporte_max, soporte_pct
+
+
+def diagnostico_con_filtros(modelo, class_idx, tau, soporte_abs):
+    """
+    Verifica si existen hojas (reglas) que cumplan SIMULTÁNEAMENTE:
+      - predicen la clase
+      - p(clase) >= tau
+      - soporte >= soporte_abs
+    Devuelve:
+      - n_ok: cuántas reglas cumplen
+      - conf_max_ok: mayor p(clase) entre las que cumplen
+      - soporte_max_ok: mayor soporte entre las que cumplen
+    """
+    tree_ = modelo.tree_
+    n_ok = 0
+    conf_max_ok = 0.0
+    soporte_max_ok = 0
+
+    for u in range(tree_.node_count):
+        if tree_.children_left[u] == -1:
+            v = np.asarray(tree_.value[u], dtype=float).reshape(-1)
+            pred = int(np.argmax(v))
+            if pred != class_idx:
+                continue
+
+            sup = int(tree_.n_node_samples[u])
+            s = v.sum()
+            p = (v[class_idx] / s) if s > 0 else 0.0
+
+            if (p >= tau) and (sup >= soporte_abs):
+                n_ok += 1
+                conf_max_ok = max(conf_max_ok, float(p))
+                soporte_max_ok = max(soporte_max_ok, sup)
+
+    return n_ok, conf_max_ok, soporte_max_ok
+
+
+# --- Diagnóstico base (sin filtros) ---
+reglas_pot, conf_max, sup_max, sup_max_pct = diagnostico_reglas_bd(
+    modelo, idx_objetivo, total_registros
+)
+
 st.sidebar.subheader("Diagnóstico de Reglas")
 st.sidebar.markdown(
     f"""
@@ -507,32 +578,67 @@ st.sidebar.markdown(
                 padding:10px 14px;
                 border-radius:8px;
                 color:black;
-                font-size:0.9rem;">
-        <b>Reglas potenciales:</b> {reglas_pot}<br/>
-        ▪ <b>Confianza máx (sin filtro):</b> {conf_max*100:.1f}% (sup={sup_confmax})<br/>
-        ▪ <b>Soporte máx (sin filtro):</b> {sup_max} ({sup_max_pct:.1f}%) (p={conf_supmax*100:.1f}%)<br/>
-        <hr style="margin:6px 0;"/>
-        ▪ <b>Confianza máx con soporte ≥ {soporte_min_abs}:</b> {conf_max_con_soporte*100:.1f}%<br/>
-        ▪ ▪ <b>Soporte máx con τ ≥ {tau_diag:.2f}:</b> {sup_max_con_tau}
+                font-size:0.9rem;
+                border: 1px solid #e0e0e0;">
+        <b>Reglas Potenciales:</b> {reglas_pot}<br/>
+        ▪ <b>Confianza Máx:</b> {conf_max*100:.1f}%<br/>
+        ▪ <b>Soporte Máx:</b> {sup_max} ({sup_max_pct:.1f}%)
     </div>
     """,
     unsafe_allow_html=True
 )
 
-st.sidebar.markdown("")
-with st.sidebar.expander("¿Cómo interpretar este diagnóstico?"):
+# --- (A) Advertencia automática por bajo soporte (riesgo de sobreajuste) ---
+# Umbral simple: si la mejor regla cubre muy poco del total, avisar.
+umbral_pct_bajo = 1.0  # 1% del total (puedes cambiarlo a 0.5 o 2.0 si quieres)
+if sup_max_pct > 0 and sup_max_pct < umbral_pct_bajo:
+    st.sidebar.warning(
+        f"⚠️ Esta clase tiene reglas muy específicas: el soporte máximo es {sup_max_pct:.1f}% "
+        f"del total. Podría haber mayor riesgo de sobreajuste."
+    )
+
+# --- (B) Mensaje amigable si con los filtros actuales no habrá reglas ---
+# Tomamos los filtros desde session_state (porque están en la sección 3).
+confianza_actual = float(st.session_state.get("confianza_pct", 90))
+soporte_pct_actual = float(st.session_state.get("soporte_pct", 1.5))
+
+tau_actual = confianza_actual / 100.0
+soporte_abs_actual = int(total_registros * (soporte_pct_actual / 100.0))
+if soporte_abs_actual < 1:
+    soporte_abs_actual = 1
+
+n_ok, conf_ok, sup_ok = diagnostico_con_filtros(modelo, idx_objetivo, tau_actual, soporte_abs_actual)
+
+if n_ok == 0:
+    st.sidebar.info(
+        "Con los filtros actuales no existen reglas que sean simultáneamente "
+        "muy confiables y representativas.\n\n"
+        "Sugerencia: reduce la **Confianza mínima** o el **Soporte mínimo** para explorar más explicaciones."
+    )
+
+# --- Expander de interpretación (mismo tamaño de letra y espaciado consistente) ---
+st.sidebar.markdown("")  # espacio pequeño
+with st.sidebar.expander("ℹ️ ¿Cómo interpretar este diagnóstico?", expanded=False):
     st.markdown(
         """
-        <div style="font-size:0.85rem; line-height:1.4;">
-        <b>Reglas potenciales:</b> número de hojas del árbol que predicen esta clase. <br/><br/>
-        <b>Confianza máxima:</b> probabilidad más alta alcanzada por la clase en alguna regla.
-        Valores muy altos pueden indicar reglas muy específicas.<br/><br/>
-        <b>Soporte máximo:</b> número máximo de registros cubiertos por una regla.
-        Soportes bajos implican mayor riesgo de sobreajuste.
+        <div style="font-size:0.80rem; line-height:1.25;">
+          <p style="margin:0 0 0.65rem 0;">
+            <b>Reglas potenciales:</b> número de hojas del árbol que predicen esta clase.
+            Un valor alto sugiere más “caminos” posibles para explicarla.
+          </p>
+          <p style="margin:0 0 0.65rem 0;">
+            <b>Confianza máx:</b> qué tan “segura” puede ser una regla para esta clase.
+            Muy alta puede indicar una regla muy específica.
+          </p>
+          <p style="margin:0;">
+            <b>Soporte máx:</b> cuántos registros alcanza la regla más representativa.
+            Soportes bajos pueden implicar mayor riesgo de sobreajuste.
+          </p>
         </div>
         """,
         unsafe_allow_html=True
     )
+
 # -----------------------------------------------------------------------------
 # FUNCIONES AUXILIARES (BASADAS EN PARTE 13)  -- LÓGICA DE LOS ÁRBOLES
 # -----------------------------------------------------------------------------
