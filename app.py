@@ -816,6 +816,29 @@ def _keep_mask_non_strict(tree_, class_idx: int, tau: float,
     dfs(0, [])
     return keep
 
+from collections import Counter
+
+def top_variables_influyentes(tree_, keep_mask, feature_names, topk=5):
+    """
+    Cuenta variables (features) usadas en los nodos que quedaron en el árbol (keep_mask=True).
+    Retorna lista de tuplas (nombre_variable, conteo).
+    """
+    counts = Counter()
+
+    for u in range(tree_.node_count):
+        if not keep_mask[u]:
+            continue
+        # solo nodos internos: hojas no tienen feature útil
+        if tree_.children_left[u] == -1:
+            continue
+        feat_idx = int(tree_.feature[u])
+        if feat_idx is None or feat_idx < 0:
+            continue
+        if feat_idx < len(feature_names):
+            counts[feature_names[feat_idx]] += 1
+
+    return counts.most_common(topk)
+
 
 def _get_paths_for_class(tree_, keep):
     paths = {}
@@ -1272,6 +1295,10 @@ with col1:
 
     tau = confianza_pct / 100.0
 
+    # Placeholder para mostrar "Variables más influyentes" debajo de los filtros
+    vars_influyentes_ph = st.empty()
+
+    
     n_ok, conf_ok, sup_ok = diagnostico_con_filtros(
         modelo, idx_objetivo, tau, soporte_absoluto
     )
@@ -1486,6 +1513,23 @@ with col2:
                 f"(confianza ≈ **{hoja_rep['p']*100:.1f}%**).\n\n"
                 f"• **Variables más influyentes (más usadas en las reglas mostradas):** {top_vars_txt}."
             )
+    # -----------------------------
+    # Variables más influyentes (y mostrarlas en col1, debajo de filtros)
+    # -----------------------------
+    if keep_mask is not None and keep_mask.any():
+        top_vars = top_variables_influyentes(tree_, keep_mask, feat_names, topk=5)
+    
+        with vars_influyentes_ph:
+            st.markdown("**Variables más influyentes (en el árbol especialista):**")
+            if len(top_vars) == 0:
+                st.caption("No fue posible identificar variables (árbol vacío o sin nodos internos).")
+            else:
+                for v, c in top_vars:
+                    st.markdown(f"- `{v}` (aparece {c} veces)")
+    else:
+        # Si no hay árbol especialista, dejamos vacío el espacio (sin duplicar advertencias)
+        with vars_influyentes_ph:
+            st.empty()
 
    
     if g is not None:
