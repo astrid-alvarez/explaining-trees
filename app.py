@@ -571,14 +571,18 @@ def sugerir_filtros_iniciales(modelo, class_idx, total_registros, tau_pref=0.90,
 # -------------------------------------------------------------------------
 # 2) Diagnóstico de reglas (UI simple + advertencia automática)
 # -------------------------------------------------------------------------
-def diagnostico_reglas_bd(modelo, class_idx, total_muestras):
+def diagnostico_reglas_bd(modelo, class_idx):
     """
-    Diagnóstico "global" (sin filtros):
-    - reglas potenciales: hojas que predicen la clase
-    - confianza máxima: mayor p(clase) en alguna hoja de esa clase
-    - soporte máximo: mayor cantidad de muestras en alguna hoja de esa clase
+    Calcula:
+      - número de hojas que predicen la clase objetivo (reglas potenciales),
+      - confianza máxima alcanzable en una hoja de esa clase,
+      - soporte máximo (absoluto y porcentual).
+    Nota: el porcentaje de soporte se calcula sobre el TOTAL usado por el árbol (nodo raíz),
+    para evitar valores > 100%.
     """
     tree_ = modelo.tree_
+    total_base = int(tree_.n_node_samples[0])  # total de muestras que vio el árbol (entrenamiento)
+
     reglas = 0
     conf_max = 0.0
     soporte_max = 0
@@ -591,13 +595,13 @@ def diagnostico_reglas_bd(modelo, class_idx, total_muestras):
                 reglas += 1
                 sup = int(tree_.n_node_samples[u])
                 soporte_max = max(soporte_max, sup)
+
                 s = v.sum()
                 p = (v[class_idx] / s) if s > 0 else 0.0
                 conf_max = max(conf_max, float(p))
 
-    soporte_pct = (soporte_max / total_muestras * 100.0) if total_muestras > 0 else 0.0
+    soporte_pct = (soporte_max / total_base * 100.0) if total_base > 0 else 0.0
     return reglas, conf_max, soporte_max, soporte_pct
-
 
 def diagnostico_con_filtros(modelo, class_idx, tau, soporte_abs):
     """
@@ -636,8 +640,9 @@ def diagnostico_con_filtros(modelo, class_idx, tau, soporte_abs):
 
 # --- Diagnóstico base (sin filtros) ---
 reglas_pot, conf_max, sup_max, sup_max_pct = diagnostico_reglas_bd(
-    modelo, idx_objetivo, total_registros
+    modelo, idx_objetivo
 )
+
 
 st.sidebar.subheader("Diagnóstico de Reglas")
 st.sidebar.markdown(
