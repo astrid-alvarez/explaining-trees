@@ -499,6 +499,74 @@ soporte_min_abs = max(1, int(total_registros * (soporte_pct_diag / 100.0)))
 
 sup_max_pct = (sup_max / total_registros * 100.0) if total_registros > 0 else 0.0
 
+def _leaf_stats_for_class(modelo, class_idx):
+    """
+    Devuelve lista de (p_clase_en_hoja, soporte_en_hoja) SOLO para hojas cuya clase predicha = class_idx.
+    """
+    tree_ = modelo.tree_
+    stats = []
+
+    for u in range(tree_.node_count):
+        if tree_.children_left[u] == -1:  # hoja
+            v = np.asarray(tree_.value[u], dtype=float).reshape(-1)
+            pred = int(np.argmax(v))
+            if pred != class_idx:
+                continue
+
+            s = float(v.sum())
+            p = float(v[class_idx] / s) if s > 0 else 0.0
+            sup = int(tree_.n_node_samples[u])
+            stats.append((p, sup))
+
+    return stats
+
+
+def sugerir_filtros_iniciales(modelo, class_idx, total_registros, tau_pref=0.90, soporte_pct_pref=1.5):
+    """
+    Intenta mantener tau y soporte preferidos.
+    Si no existen reglas, ajusta automáticamente (primero soporte, luego tau) para garantizar al menos 1 regla.
+    Retorna (confianza_pct_sugerida, soporte_pct_sugerido, motivo).
+    """
+    stats = _leaf_stats_for_class(modelo, class_idx)
+
+    if not stats:
+        # No hay hojas que predigan esa clase (raro, pero posible)
+        return 50, 0.1, "Sin hojas que predigan esta clase; se usan valores mínimos para explorar."
+
+    tau0 = float(tau_pref)
+    sup_abs0 = max(1, int(total_registros * (soporte_pct_pref / 100.0)))
+
+    # Helpers
+    def existe_regla(tau, sup_abs):
+        return any((p >= tau and sup >= sup_abs) for (p, sup) in stats)
+
+    # 1) Si con lo preferido ya hay reglas, perfecto
+    if existe_regla(tau0, sup_abs0):
+        return int(round(tau0 * 100)), float(soporte_pct_pref), "Valores preferidos: existen reglas."
+
+    # 2) Mantener tau0 y bajar soporte al máximo disponible bajo tau0 (si existe)
+    soportes_con_tau0 = [sup for (p, sup) in stats if p >= tau0]
+    if soportes_con_tau0:
+        sup_abs_sug = max(1, max(soportes_con_tau0))  # el mayor soporte que cumple tau0
+        soporte_pct_sug = (sup_abs_sug / total_registros) * 100.0
+        return int(round(tau0 * 100)), float(soporte_pct_sug), "Se mantuvo confianza; se ajustó soporte al máximo posible para esa confianza."
+
+    # 3) Si ni siquiera hay hojas con p>=tau0, bajar tau gradualmente hasta encontrar algo
+    # probamos una rejilla razonable
+    taus = [0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50]
+    for tau in taus:
+        soportes = [sup for (p, sup) in stats if p >= tau]
+        if soportes:
+            # elegimos soporte para que NO sea ultra pequeño: tomamos el percentil 75 de soportes disponibles
+            soportes_sorted = sorted(soportes)
+            k = int(0.75 * (len(soportes_sorted) - 1)) if len(soportes_sorted) > 1 else 0
+            sup_abs_sug = max(1, soportes_sorted[k])
+            soporte_pct_sug = (sup_abs_sug / total_registros) * 100.0
+            return int(round(tau * 100)), float(soporte_pct_sug), "Se ajustó confianza y soporte para garantizar reglas."
+
+    # 4) Último recurso
+    return 50, 0.1, "No se encontró combinación razonable; se usan mínimos para explorar."
+
 
 # -------------------------------------------------------------------------
 # 2) Diagnóstico de reglas (UI simple + advertencia automática)
@@ -1166,7 +1234,26 @@ with col1:
             """,
             unsafe_allow_html=True
         )
+    # --- sugerir defaults "inteligentes" para esta BD y esta clase ---
+conf_sug, sop_sug, motivo = sugerir_filtros_iniciales(
+    modelo=modelo,
+    class_idx=idx_objetivo,
+    total_registros=total_registros,   # OJO: aquí usa el total que usas para soporte (tu total_registros)
+    tau_pref=0.90,
+    soporte_pct_pref=1.5
+)
 
+# Solo resetear valores cuando cambie BD o clase (si no, molesta al usuario)
+bd_prev = st.session_state.get("bd_prev")
+cls_prev = st.session_state.get("cls_prev")
+
+if (bd_prev != nombre_bd) or (cls_prev != idx_objetivo):
+    st.session_state["confianza_pct"] = conf_sug
+    st.session_state["soporte_pct"] = sop_sug
+    st.session_state["bd_prev"] = nombre_bd
+    st.session_state["cls_prev"] = idx_objetivo
+
+    
     # 🔽 Ambos inputs DENTRO de col1 y alineados
     confianza_pct = st.number_input(
         "Confianza Mínima (%)",
