@@ -12,19 +12,27 @@ import os
 import math
 import matplotlib.pyplot as plt
 from PIL import Image
+import streamlit.components.v1 as components
 
 # -----------------------------------------------------------------------------
 # FUNCIÓN AUXILIAR: MOSTRAR DOT COMO PNG (para ver el árbol completo)
 # -----------------------------------------------------------------------------
-def mostrar_dot_en_streamlit(dot):
+def mostrar_dot_en_streamlit(dot, height=820):
     """
-    Renderiza un grafo graphviz.Digraph a PNG y lo muestra completo en Streamlit.
+    Renderiza un graphviz.Digraph en SVG (evita bitmap gigante/cairo/PIL).
+    Si falla, intenta PNG como fallback.
     """
     try:
-        png_bytes = dot.pipe(format="png")  # resolución controlada en graph_attr
-        st.image(png_bytes, use_container_width=True)
-    except Exception as e:
-        st.error(f"Error al renderizar el árbol en PNG: {e}")
+        svg_bytes = dot.pipe(format="svg")
+        components.html(svg_bytes.decode("utf-8"), height=height, scrolling=True)
+    except Exception as e_svg:
+        try:
+            png_bytes = dot.pipe(format="png")
+            st.image(png_bytes, use_container_width=True)
+        except Exception as e_png:
+            st.error("No se pudo renderizar el árbol (demasiado grande o excede límites del servidor).")
+            st.caption(f"Detalle SVG: {e_svg}")
+            st.caption(f"Detalle PNG: {e_png}")
 
 # -----------------------------------------------------------------------------
 # CONFIGURACIÓN Y ESTILOS
@@ -964,7 +972,7 @@ def build_compacted_graphviz_non_strict(modelo, clase, tau, soporte,
             "rankdir": "TB",
             "splines": "true",
             "fontname": "Helvetica",
-            "dpi": "300",
+            "dpi": "120",
             "label": (
                 f"Clase: {clase} | Confianza: τ={tau:.2f} | "
                 f"Soporte: ≥{soporte} muestras | ÁRBOL COMPACTO (NO ESTRICTO)"
@@ -1097,7 +1105,7 @@ def build_compacted_graphviz_strict(modelo, clase, tau, soporte,
             "rankdir": "TB",
             "splines": "true",
             "fontname": "Helvetica",
-            "dpi": "300",
+            "dpi": "120",
             "label": (
                 f"Clase: {clase} | Confianza: τ={tau:.2f} | "
                 f"Soporte: ≥{soporte} muestras | "
