@@ -30,7 +30,7 @@ def mostrar_dot_en_streamlit(dot):
 # CONFIGURACIÓN Y ESTILOS
 # -----------------------------------------------------------------------------
 st.set_page_config(page_title="Evaluación XAI", layout="wide")
-
+MAX_NODOS_RENDER = 300   # umbral seguro para Streamlit Cloud + graphviz/cairo
 PALETTE = [
     "#FF8C00", "#32CD32", "#8A2BE2", "#00BFFF",
     "#FFD700", "#DA70D6", "#40E0D0", "#FFB6C1",
@@ -1513,7 +1513,18 @@ with col2:
         g = None
     
     if g is not None:
+    n_nodos = int(keep_mask.sum())
+
+    if n_nodos > MAX_NODOS_RENDER:
+        st.warning(
+            f"El árbol especialista tiene {n_nodos} nodos y es demasiado grande para "
+            "renderizarlo de forma segura.\n\n"
+            "Sugerencia: aumenta la **Confianza mínima** o el **Soporte mínimo** "
+            "para simplificar el árbol."
+        )
+    else:
         mostrar_dot_en_streamlit(g)
+
 
 
     
