@@ -1219,9 +1219,10 @@ with col1:
         "Tipo de Árbol",
         (
             "Modo NO ESTRICTO (Original/Exploratorio)",
-            "Modo ESTRICTO ( + Monotonía probabilística)"
+            "Modo ESTRICTO (+ Monotonía probabilística)"
         ),
-        index=0
+        index=0,
+        key="modo_arbol"
     )
 
     with st.expander("Guía rápida de filtros", expanded=False):
@@ -1234,54 +1235,57 @@ with col1:
             """,
             unsafe_allow_html=True
         )
+
     # --- sugerir defaults "inteligentes" para esta BD y esta clase ---
     conf_sug, sop_sug, motivo = sugerir_filtros_iniciales(
         modelo=modelo,
         class_idx=idx_objetivo,
-        total_registros=total_registros,   # OJO: aquí usa el total que usas para soporte (tu total_registros)
+        total_registros=total_registros,
         tau_pref=0.90,
         soporte_pct_pref=1.5
     )
-    
+
     # Solo resetear valores cuando cambie BD o clase (si no, molesta al usuario)
     bd_prev = st.session_state.get("bd_prev")
     cls_prev = st.session_state.get("cls_prev")
-    
+
     if (bd_prev != nombre_bd) or (cls_prev != idx_objetivo):
         st.session_state["confianza_pct"] = conf_sug
         st.session_state["soporte_pct"] = sop_sug
         st.session_state["bd_prev"] = nombre_bd
         st.session_state["cls_prev"] = idx_objetivo
-    
-        
-        # 🔽 Ambos inputs DENTRO de col1 y alineados
-        confianza_pct = st.number_input(
-            "Confianza Mínima (%)",
-            min_value=0,
-            max_value=100,
-            value=90,
-            step=5,
-            key="confianza_pct"
-        )
-    
-        soporte_pct = st.number_input(
-            "Soporte Mínimo (% Total)",
-            min_value=0.1,
-            max_value=50.0,
-            value=1.5,
-            step=0.5,
-            format="%.2f",
-            key="soporte_pct"
-        )
-    
-        # 🔽 Cálculo FUERA de cualquier expander, pero DENTRO de col1
-        soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
-        if soporte_absoluto < 1:
-            soporte_absoluto = 1
-    
-        st.caption(f"Soporte absoluto: {soporte_absoluto} muestras.")
-    
-        tau = confianza_pct / 100.0
+
+    # 🔽 Inputs SIEMPRE (sin value= para evitar warning por session_state)
+    st.number_input(
+        "Confianza Mínima (%)",
+        min_value=0,
+        max_value=100,
+        step=5,
+        key="confianza_pct"
+    )
+
+    st.number_input(
+        "Soporte Mínimo (% Total)",
+        min_value=0.1,
+        max_value=50.0,
+        step=0.5,
+        format="%.2f",
+        key="soporte_pct"
+    )
+
+    # 🔽 Leer valores finales desde session_state
+    confianza_pct = float(st.session_state["confianza_pct"])
+    soporte_pct = float(st.session_state["soporte_pct"])
+
+    # 🔽 Cálculos DENTRO de col1 (siempre definidos)
+    soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
+    if soporte_absoluto < 1:
+        soporte_absoluto = 1
+
+    st.caption(f"Soporte absoluto: {soporte_absoluto} muestras.")
+
+    tau = confianza_pct / 100.0
+
 
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA DERECHA (COMPARACIÓN + ÁRBOL)
