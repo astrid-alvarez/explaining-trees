@@ -1472,11 +1472,11 @@ with col2:
         if os.path.exists(nombre_imagen_global):
             # Mostrar imagen SOLO si Streamlit/PIL la puede abrir sin reventar
             try:
-              #  st.image(
-               #     nombre_imagen_global,
-                #    caption=f"Modelo Generalizado - {prefijo_bd}",
-                #    use_container_width=True
-                #)
+               st.image(
+                    nombre_imagen_global,
+                    caption=f"Modelo Generalizado - {prefijo_bd}",
+                    use_container_width=True
+                )
             except Exception as e_img:
                 st.warning(
                     "La imagen del Árbol Generalizado es demasiado grande para visualizarla aquí "
