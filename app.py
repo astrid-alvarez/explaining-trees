@@ -1,4 +1,4 @@
-este es el archivo que me guardaste y las líneas de código son estas: quiero que guardes el código como ha quedado hasta ahora: # =============================================================================
+# =============================================================================
 # APLICACIÓN WEB PARA EVALUACIÓN CUALITATIVA (OE3)
 # Autor: Astrid Yinnet Álvarez Castro
 # =============================================================================
