@@ -18,21 +18,46 @@ import base64
 # -----------------------------------------------------------------------------
 # FUNCIÓN AUXILIAR: MOSTRAR DOT COMO PNG (para ver el árbol completo)
 # -----------------------------------------------------------------------------
-def mostrar_dot_en_streamlit(dot, height=820):
+def mostrar_dot_en_streamlit(dot, height=820, scale=0.85):
     """
-    Renderiza SOLO en SVG.
-    Nunca intenta PNG (evita crash por imágenes gigantes).
+    Renderiza en SVG pero ajustándolo al ancho del contenedor.
+    scale < 1.0 reduce el tamaño para evitar scroll horizontal/vertical.
     """
     try:
         svg_bytes = dot.pipe(format="svg")
+        svg = svg_bytes.decode("utf-8")
+
+        # 1) Quitar width/height fijos para que sea responsive
+        #    (Graphviz pone width="XXXXpt" height="YYYYpt")
+        import re
+        svg = re.sub(r'\swidth="[^"]+"', "", svg, count=1)
+        svg = re.sub(r'\sheight="[^"]+"', "", svg, count=1)
+
+        # 2) Inyectar estilo responsive en <svg ...>
+        #    y aplicar escala para que "quepa" mejor en pantalla.
+        svg = svg.replace(
+            "<svg ",
+            f'<svg style="width:100%; height:auto; transform:scale({scale}); transform-origin:0 0;" ',
+            1
+        )
+
+        # 3) Ajustar la altura del contenedor para compensar el scale
+        #    (si escalas a 0.85, el contenido se hace más pequeño y puede quedar espacio extra)
+        safe_height = int(height / scale) if scale > 0 else height
+
         components.html(
-            svg_bytes.decode("utf-8"),
-            height=height,
+            f"""
+            <div style="width:100%; overflow:auto; border:1px solid rgba(255,255,255,0.15); border-radius:8px;">
+              {svg}
+            </div>
+            """,
+            height=safe_height,
             scrolling=True
         )
     except Exception as e_svg:
         st.error("No se pudo renderizar el árbol en SVG (demasiado grande o complejo).")
         st.exception(e_svg)
+
 
 # -----------------------------------------------------------------------------
 # CONFIGURACIÓN Y ESTILOS
