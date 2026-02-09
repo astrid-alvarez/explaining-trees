@@ -841,6 +841,27 @@ def _get_paths_for_class(tree_, keep):
     dfs(0, [])
     return paths
 
+from collections import Counter
+
+def top_variables_influyentes(tree_, keep_mask, feature_names, topk=5):
+    """
+    Calcula las variables más influyentes DEL ÁRBOL ESPECIALISTA ACTUAL.
+    Cuenta cuántas veces aparece cada variable en nodos keep (no hojas).
+    """
+    counts = Counter()
+
+    for u in range(tree_.node_count):
+        if not keep_mask[u]:
+            continue
+        if tree_.children_left[u] == -1:
+            continue  # ignorar hojas
+        feat_idx = int(tree_.feature[u])
+        if 0 <= feat_idx < len(feature_names):
+            counts[feature_names[feat_idx]] += 1
+
+    return [name for name, _ in counts.most_common(topk)]
+
+
 
 def _compact_path_to_intervals(path, feature_names):
     bounds = {}
@@ -1282,6 +1303,27 @@ with col1:
             "muy confiables y representativas.\n\n"
             "Sugerencia: reduce la **Confianza mínima** o el **Soporte mínimo** para explorar más explicaciones."
         )
+
+    # -----------------------------
+    # Variables más influyentes (árbol especialista)
+    # -----------------------------
+    st.markdown("**Variables más influyentes (árbol especialista):**")
+
+    if keep_mask is not None and keep_mask.any():
+        top_vars = top_variables_influyentes(
+            tree_=tree_,
+            keep_mask=keep_mask,
+            feature_names=feat_names,
+            topk=5
+        )
+
+        if len(top_vars) == 0:
+            st.caption("—")
+        else:
+            for v in top_vars:
+                st.markdown(f"- `{v}`")
+    else:
+        st.caption("—")
 
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA DERECHA (COMPARACIÓN + ÁRBOL)
