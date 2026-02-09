@@ -1328,28 +1328,7 @@ with col1:
             min_samples_to_keep=soporte_absoluto
         )
 
-    # -----------------------------
-    # Variables más influyentes (árbol especialista)
-    # -----------------------------
-    st.markdown("**Variables más influyentes (árbol especialista):**")
-
-    if keep_mask is not None and keep_mask.any():
-        top_vars = top_variables_influyentes(
-            tree_=tree_,
-            keep_mask=keep_mask,
-            feature_names=feat_names,
-            topk=5
-        )
-
-        if len(top_vars) == 0:
-            st.caption("—")
-        else:
-            for v in top_vars:
-                st.markdown(f"- `{v}`")
-    else:
-        st.caption("—")
-
-    # -----------------------------
+     # -----------------------------
     # Variables más influyentes (árbol especialista)
     # -----------------------------
     st.markdown("**Variables más influyentes (árbol especialista):**")
