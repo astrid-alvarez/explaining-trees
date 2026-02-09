@@ -12,7 +12,7 @@ import os
 import math
 import matplotlib.pyplot as plt
 from PIL import Image
-
+from collections import Counter
 # -----------------------------------------------------------------------------
 # FUNCIÓN AUXILIAR: MOSTRAR DOT COMO PNG (para ver el árbol completo)
 # -----------------------------------------------------------------------------
@@ -1303,6 +1303,51 @@ with col1:
             "muy confiables y representativas.\n\n"
             "Sugerencia: reduce la **Confianza mínima** o el **Soporte mínimo** para explorar más explicaciones."
         )
+        # -----------------------------
+    # Calcular keep_mask del árbol especialista (para variables influyentes)
+    # -----------------------------
+    tree_ = modelo.tree_
+    cidx = idx_objetivo
+
+    modo_no_estricto = ("no estricto" in modo_arbol.lower()) or (
+        "no" in modo_arbol.lower() and "estrict" in modo_arbol.lower()
+    )
+
+    if modo_no_estricto:
+        keep_mask = _keep_mask_non_strict(
+            tree_,
+            cidx,
+            tau,
+            min_samples_to_keep=soporte_absoluto
+        )
+    else:
+        keep_mask = _keep_mask_strict_monotonic(
+            tree_,
+            cidx,
+            tau,
+            min_samples_to_keep=soporte_absoluto
+        )
+
+    # -----------------------------
+    # Variables más influyentes (árbol especialista)
+    # -----------------------------
+    st.markdown("**Variables más influyentes (árbol especialista):**")
+
+    if keep_mask is not None and keep_mask.any():
+        top_vars = top_variables_influyentes(
+            tree_=tree_,
+            keep_mask=keep_mask,
+            feature_names=feat_names,
+            topk=5
+        )
+
+        if len(top_vars) == 0:
+            st.caption("—")
+        else:
+            for v in top_vars:
+                st.markdown(f"- `{v}`")
+    else:
+        st.caption("—")
 
     # -----------------------------
     # Variables más influyentes (árbol especialista)
