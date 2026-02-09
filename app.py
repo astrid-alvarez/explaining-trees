@@ -1,4 +1,4 @@
-# =============================================================================
+este es el archivo que me guardaste y las líneas de código son estas: quiero que guardes el código como ha quedado hasta ahora: # =============================================================================
 # APLICACIÓN WEB PARA EVALUACIÓN CUALITATIVA (OE3)
 # Autor: Astrid Yinnet Álvarez Castro
 # =============================================================================
@@ -12,58 +12,25 @@ import os
 import math
 import matplotlib.pyplot as plt
 from PIL import Image
-import streamlit.components.v1 as components
-import base64
 
 # -----------------------------------------------------------------------------
 # FUNCIÓN AUXILIAR: MOSTRAR DOT COMO PNG (para ver el árbol completo)
 # -----------------------------------------------------------------------------
-def mostrar_dot_en_streamlit(dot, height=820):
+def mostrar_dot_en_streamlit(dot):
     """
-    Renderiza en SVG como <img> (base64) para que el navegador lo escale
-    automáticamente al contenedor (sin PIL, sin PNG, sin scroll).
+    Renderiza un grafo graphviz.Digraph a PNG y lo muestra completo en Streamlit.
     """
     try:
-        svg_bytes = dot.pipe(format="svg")
-        svg_b64 = base64.b64encode(svg_bytes).decode("utf-8")
-
-        components.html(
-            f"""
-            <div style="
-                width:100%;
-                height:{height}px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                border:1px solid rgba(255,255,255,0.15);
-                border-radius:8px;
-                overflow:hidden;   /* <-- clave: sin barras */
-                background:transparent;
-            ">
-              <img
-                src="data:image/svg+xml;base64,{svg_b64}"
-                style="
-                    width:100%;
-                    height:100%;
-                    object-fit:contain;  /* <-- clave: encaja completo */
-                "
-              />
-            </div>
-            """,
-            height=height,
-            scrolling=False
-        )
-
-    except Exception as e_svg:
-        st.error("No se pudo renderizar el árbol en SVG (demasiado grande o complejo).")
-        st.exception(e_svg)
-
+        png_bytes = dot.pipe(format="png")  # resolución controlada en graph_attr
+        st.image(png_bytes, use_container_width=True)
+    except Exception as e:
+        st.error(f"Error al renderizar el árbol en PNG: {e}")
 
 # -----------------------------------------------------------------------------
 # CONFIGURACIÓN Y ESTILOS
 # -----------------------------------------------------------------------------
 st.set_page_config(page_title="Evaluación XAI", layout="wide")
-MAX_NODOS_RENDER = 200  # umbral seguro para Streamlit Cloud + graphviz/cairo
+
 PALETTE = [
     "#FF8C00", "#32CD32", "#8A2BE2", "#00BFFF",
     "#FFD700", "#DA70D6", "#40E0D0", "#FFB6C1",
@@ -849,21 +816,6 @@ def _keep_mask_non_strict(tree_, class_idx: int, tau: float,
     dfs(0, [])
     return keep
 
-from collections import Counter
-
-def top_variables_influyentes(tree_, keep_mask, feature_names, topk=5):
-    counts = Counter()
-    for u in range(tree_.node_count):
-        if not keep_mask[u]:
-            continue
-        if tree_.children_left[u] == -1:
-            continue
-        feat_idx = int(tree_.feature[u])
-        if feat_idx < 0 or feat_idx >= len(feature_names):
-            continue
-        counts[feature_names[feat_idx]] += 1
-    return [name for name, _ in counts.most_common(topk)]
-
 
 def _get_paths_for_class(tree_, keep):
     paths = {}
@@ -997,7 +949,7 @@ def build_compacted_graphviz_non_strict(modelo, clase, tau, soporte,
             "rankdir": "TB",
             "splines": "true",
             "fontname": "Helvetica",
-            "dpi": "120",
+            "dpi": "300",
             "label": (
                 f"Clase: {clase} | Confianza: τ={tau:.2f} | "
                 f"Soporte: ≥{soporte} muestras | ÁRBOL COMPACTO (NO ESTRICTO)"
@@ -1130,7 +1082,7 @@ def build_compacted_graphviz_strict(modelo, clase, tau, soporte,
             "rankdir": "TB",
             "splines": "true",
             "fontname": "Helvetica",
-            "dpi": "120",
+            "dpi": "300",
             "label": (
                 f"Clase: {clase} | Confianza: τ={tau:.2f} | "
                 f"Soporte: ≥{soporte} muestras | "
@@ -1288,8 +1240,6 @@ with col1:
         st.session_state["soporte_pct"] = sop_sug
         st.session_state["bd_prev"] = nombre_bd
         st.session_state["cls_prev"] = idx_objetivo
-        st.session_state["top_vars_especialista"] = []
-        st.session_state["keep_mask_especialista"] = None   # Reset para que NO se hereden variables influyentes de otra BD/clase
 
     # Inputs SIEMPRE (sin value= para evitar warning por session_state)
     st.number_input(
@@ -1309,80 +1259,19 @@ with col1:
         key="soporte_pct"
     )
 
-   #  Leer valores finales desde session_state (lo que el usuario ve y edita)
+    #  Leer valores finales desde session_state
     confianza_pct = float(st.session_state["confianza_pct"])
     soporte_pct = float(st.session_state["soporte_pct"])
 
-    # Calcular umbrales reales a partir de los inputs (y guardarlos)
-    soporte_absoluto_calc = int(total_registros * (soporte_pct / 100.0))
-    if soporte_absoluto_calc < 1:
-        soporte_absoluto_calc = 1
-    tau_calc = confianza_pct / 100.0
+    #  Cálculos DENTRO de col1 (siempre definidos)
+    soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
+    if soporte_absoluto < 1:
+        soporte_absoluto = 1
 
-    st.session_state["soporte_absoluto_actual"] = soporte_absoluto_calc
-    st.session_state["tau_actual"] = tau_calc
-
-    
-    # ✅ Usar los valores PRECALCULADOS (mismos que se usan para keep_mask y top_vars)
-    # (estos los deja el bloque que debes poner antes de col1/col2)
-    soporte_absoluto = int(st.session_state.get("soporte_absoluto_actual", 1))
-    tau = float(st.session_state.get("tau_actual", confianza_pct / 100.0))
-    
     st.caption(f"Soporte absoluto: {soporte_absoluto} muestras.")
-    
-    # -----------------------------
-    # Calcular keep_mask + variables influyentes (AQUÍ, en col1)
-    # -----------------------------
-    tree_ = modelo.tree_
-    cidx = idx_objetivo
-    keep_mask = st.session_state.get("keep_mask_especialista", None)
 
-    modo_no_estricto = ("no estricto" in modo_arbol.lower())
-    
-    if modo_no_estricto:
-        keep_mask = _keep_mask_non_strict(
-            tree_,
-            cidx,
-            tau,
-            min_samples_to_keep=soporte_absoluto
-        )
-    else:
-        keep_mask = _keep_mask_strict_monotonic(
-            tree_,
-            cidx,
-            tau,
-            min_samples_to_keep=soporte_absoluto
-        )
-    
-    # Guardar SIEMPRE para que col2 lo reutilice
-    st.session_state["keep_mask_especialista"] = keep_mask
-    
-    # Variables influyentes (solo si hay árbol)
-    if keep_mask is not None and keep_mask.any():
-        st.session_state["top_vars_especialista"] = top_variables_influyentes(
-            tree_=tree_,
-            keep_mask=keep_mask,
-            feature_names=feat_names,
-            topk=5
-        )
-    else:
-        st.session_state["top_vars_especialista"] = []
-    
-        
-    
-    # -----------------------------
-    # Variables más influyentes (árbol especialista)
-    # -----------------------------
-    top_vars = st.session_state.get("top_vars_especialista", [])
-    
-    st.markdown("**Variables más influyentes (árbol especialista):**")
-    if len(top_vars) == 0:
-        st.caption("—")
-    else:
-        for v in top_vars[:5]:
-            st.markdown(f"- `{v}`")
-    
-    # Diagnóstico con los mismos umbrales que usaste para construir el árbol especialista
+    tau = confianza_pct / 100.0
+
     n_ok, conf_ok, sup_ok = diagnostico_con_filtros(
         modelo, idx_objetivo, tau, soporte_absoluto
     )
@@ -1394,78 +1283,9 @@ with col1:
             "Sugerencia: reduce la **Confianza mínima** o el **Soporte mínimo** para explorar más explicaciones."
         )
 
-
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA DERECHA (COMPARACIÓN + ÁRBOL)
 # -----------------------------------------------------------------------------
-def _leaf_stats_for_predicted_class(modelo, class_idx, keep_mask=None):
-    """
-    Recolecta estadísticas de hojas que:
-      - predicen class_idx
-      - y opcionalmente están dentro de keep_mask (si se entrega)
-    Devuelve lista de dicts: {"leaf": u, "p": p_clase, "sup": soporte, "counts": w}
-    """
-    tree_ = modelo.tree_
-    out = []
-
-    for u in range(tree_.node_count):
-        if tree_.children_left[u] != -1:
-            continue  # no hoja
-
-        if keep_mask is not None and (not bool(keep_mask[u])):
-            continue
-
-        w, probs, sup = _node_counts_and_probvec(tree_, u)
-        pred = int(np.argmax(w))
-        if pred != class_idx:
-            continue
-
-        p = float(probs[class_idx]) if probs.size > 0 else 0.0
-        out.append({"leaf": u, "p": p, "sup": int(sup), "counts": w})
-
-    return out
-
-
-def _top_features_from_paths(modelo, keep_mask, feature_names, top_k=5):
-    """
-    Cuenta cuántas veces aparece cada feature en los caminos raíz->hoja (solo nodos keep).
-    Usa el árbol ORIGINAL (tree_.feature) y un parent-array para reconstruir caminos.
-    """
-    tree_ = modelo.tree_
-    n = tree_.node_count
-
-    # parent de cada nodo
-    parent = np.full(n, -1, dtype=int)
-    stack = [0]
-    while stack:
-        u = stack.pop()
-        L, R = int(tree_.children_left[u]), int(tree_.children_right[u])
-        if L != -1:
-            parent[L] = u
-            stack.append(L)
-        if R != -1:
-            parent[R] = u
-            stack.append(R)
-
-    # hojas keep
-    leaves = [u for u in range(n) if tree_.children_left[u] == -1 and bool(keep_mask[u])]
-    if not leaves:
-        return []
-
-    counts = {}
-    for leaf in leaves:
-        u = leaf
-        while u != -1:
-            if bool(keep_mask[u]):
-                feat = int(tree_.feature[u])
-                if feat >= 0 and feat < len(feature_names):
-                    fname = feature_names[feat]
-                    counts[fname] = counts.get(fname, 0) + 1
-            u = parent[u]
-
-    orden = sorted(counts.items(), key=lambda x: x[1], reverse=True)
-    return orden[:top_k]
-
 with col2:
     # -----------------------------
     # Resumen del árbol (profundidad/nodos/hojas)
@@ -1483,10 +1303,7 @@ with col2:
         f"Resumen del árbol: profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}."
     )
     if max_depth >= 12:
-        st.info(
-            "Árbol profundo: puede ser difícil de leer ampliando, "
-            "descarga el Árbol Generalizado (PNG)."
-        )
+        st.info("Árbol profundo: puede ser difícil de leer ampliando, descarga el Árbol Generalizado (PNG).")
 
     # -----------------------------
     # Árbol generalizado (comparación) + descarga PNG
@@ -1499,33 +1316,20 @@ with col2:
         nombre_imagen_global = f"ARBOL_GENERALIZADO_{prefijo_bd}.png"
 
         if os.path.exists(nombre_imagen_global):
-            # Leer bytes SIN PIL
+            st.image(
+                nombre_imagen_global,
+                caption=f"Modelo Generalizado - {prefijo_bd}",
+                use_container_width=True
+            )
+
+            # Botón de descarga (PNG)
             with open(nombre_imagen_global, "rb") as f:
-                img_bytes = f.read()
-
-            # Render en HTML (no PIL, no crash)
-            import base64
-            b64 = base64.b64encode(img_bytes).decode("utf-8")
-            components.html(
-                f"""
-                <div style="width:100%; overflow:auto; border:1px solid #333; padding:6px; border-radius:8px;">
-                  <div style="font-size:14px; margin-bottom:6px;">
-                    <b>Modelo Generalizado - {prefijo_bd}</b>
-                  </div>
-                  <img src="data:image/png;base64,{b64}" style="max-width:100%; height:auto;" />
-                </div>
-                """,
-                height=520,
-                scrolling=True
-            )
-
-            # Descarga segura
-            st.download_button(
-                "⬇️ Descargar Árbol Generalizado (PNG)",
-                data=img_bytes,
-                file_name=nombre_imagen_global,
-                mime="image/png"
-            )
+                st.download_button(
+                    "⬇️ Descargar Árbol Generalizado (PNG)",
+                    data=f.read(),
+                    file_name=nombre_imagen_global,
+                    mime="image/png"
+                )
         else:
             st.warning(
                 f"No se encontró la imagen '{nombre_imagen_global}'. "
@@ -1537,72 +1341,58 @@ with col2:
     # -----------------------------
     st.subheader("🌳 Árbol Especialista Generado")
 
-    try:
-        tree_ = modelo.tree_
-        cidx = idx_objetivo
+    tree_ = modelo.tree_
+    cidx = idx_objetivo
 
-        # Recuperar keep_mask calculado en col1
-        keep_mask = st.session_state.get("keep_mask_especialista", None)
+    # Condición robusta (no depende de mayúsculas/minúsculas exactas)
+    modo_no_estricto = ("no estricto" in modo_arbol.lower()) or ("no" in modo_arbol.lower() and "estrict" in modo_arbol.lower())
 
-        modo_no_estricto = ("no estricto" in modo_arbol.lower())
+    if modo_no_estricto:
+        keep_mask = _keep_mask_non_strict(
+            tree_,
+            cidx,
+            tau,
+            min_samples_to_keep=soporte_absoluto
+        )
+        st.caption(f"Modo NO estricto: nodos_keep={int(keep_mask.sum())}")
 
-        # Construir árbol SOLO si hay nodos válidos
-        if keep_mask is not None and keep_mask.any():
-            if modo_no_estricto:
-                g = build_compacted_graphviz_non_strict(
-                    modelo=modelo,
-                    clase=class_names[cidx],
-                    tau=tau,
-                    soporte=soporte_absoluto,
-                    keep_mask=keep_mask,
-                    feature_names=feat_names,
-                    class_names_list=class_names,
-                    color_clase=color_clase_hex
-                )
-            else:
-                g = build_compacted_graphviz_strict(
-                    modelo=modelo,
-                    clase=class_names[cidx],
-                    tau=tau,
-                    soporte=soporte_absoluto,
-                    keep_mask=keep_mask,
-                    feature_names=feat_names,
-                    class_names_list=class_names,
-                    color_clase=color_clase_hex
-                )
+        if keep_mask.any():
+            g = build_compacted_graphviz_non_strict(
+                modelo=modelo,
+                clase=class_names[cidx],
+                tau=tau,
+                soporte=soporte_absoluto,
+                keep_mask=keep_mask,
+                feature_names=feat_names,
+                class_names_list=class_names,
+                color_clase=color_clase_hex
+            )
+        else:
+            g = None
+    else:
+        keep_mask = _keep_mask_strict_monotonic(
+            tree_,
+            cidx,
+            tau,
+            min_samples_to_keep=soporte_absoluto
+        )
+        st.caption(f"Modo ESTRICTO: nodos_keep={int(keep_mask.sum())}")
+
+        if keep_mask.any():
+            g = build_compacted_graphviz_strict(
+                modelo=modelo,
+                clase=class_names[cidx],
+                tau=tau,
+                soporte=soporte_absoluto,
+                keep_mask=keep_mask,
+                feature_names=feat_names,
+                class_names_list=class_names,
+                color_clase=color_clase_hex
+            )
         else:
             g = None
 
-        # Render seguro
-        if g is not None:
-            n_nodos = int(keep_mask.sum())
-            if n_nodos > MAX_NODOS_RENDER:
-                st.warning(
-                    f"El árbol especialista tiene {n_nodos} nodos y es demasiado grande "
-                    "para renderizarlo de forma segura.\n\n"
-                    "Sugerencia: aumenta la **Confianza mínima** o el **Soporte mínimo**."
-                )
-            else:
-               mostrar_dot_en_streamlit(g, height=650)
-
-        else:
-            st.info(
-                "Con los filtros actuales no se generó un árbol especialista "
-                "(no hay reglas que cumplan)."
-            )
-
-    except Exception as e:
-        st.error("Se produjo un error al construir/renderizar el árbol especialista.")
-        st.exception(e)
-        st.stop()
-
-
-
    
-
-
-
-
+    if g is not None:
+        mostrar_dot_en_streamlit(g)
     
-
-
