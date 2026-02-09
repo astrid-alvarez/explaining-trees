@@ -13,6 +13,7 @@ import math
 import matplotlib.pyplot as plt
 from PIL import Image
 import streamlit.components.v1 as components
+import base64
 
 # -----------------------------------------------------------------------------
 # FUNCIÓN AUXILIAR: MOSTRAR DOT COMO PNG (para ver el árbol completo)
@@ -1457,7 +1458,10 @@ with col2:
         f"Resumen del árbol: profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}."
     )
     if max_depth >= 12:
-        st.info("Árbol profundo: puede ser difícil de leer ampliando, descarga el Árbol Generalizado (PNG).")
+        st.info(
+            "Árbol profundo: puede ser difícil de leer ampliando, "
+            "descarga el Árbol Generalizado (PNG)."
+        )
 
     # -----------------------------
     # Árbol generalizado (comparación) + descarga PNG
@@ -1470,105 +1474,102 @@ with col2:
         nombre_imagen_global = f"ARBOL_GENERALIZADO_{prefijo_bd}.png"
 
         if os.path.exists(nombre_imagen_global):
-            # Mostrar imagen SOLO si Streamlit/PIL la puede abrir sin reventar
-            try:
-               st.image(
-                    nombre_imagen_global,
-                    caption=f"Modelo Generalizado - {prefijo_bd}",
-                    use_container_width=True
-                )
-            except Exception as e_img:
-                st.warning(
-                    "La imagen del Árbol Generalizado es demasiado grande para visualizarla aquí "
-                    "(límite de seguridad del servidor). Puedes descargarla abajo."
-                )
-                st.caption(f"Detalle: {e_img}")
-        
-            # Descarga (esto no intenta decodificar la imagen)
+            # Leer bytes SIN PIL
             with open(nombre_imagen_global, "rb") as f:
-                st.download_button(
-                    "⬇️ Descargar Árbol Generalizado (PNG)",
-                    data=f.read(),
-                    file_name=nombre_imagen_global,
-                    mime="image/png"
-                )
+                img_bytes = f.read()
 
+            # Render en HTML (no PIL, no crash)
+            import base64
+            b64 = base64.b64encode(img_bytes).decode("utf-8")
+            components.html(
+                f"""
+                <div style="width:100%; overflow:auto; border:1px solid #333; padding:6px; border-radius:8px;">
+                  <div style="font-size:14px; margin-bottom:6px;">
+                    <b>Modelo Generalizado - {prefijo_bd}</b>
+                  </div>
+                  <img src="data:image/png;base64,{b64}" style="max-width:100%; height:auto;" />
+                </div>
+                """,
+                height=520,
+                scrolling=True
+            )
 
-            with open(nombre_imagen_global, "rb") as f:
-                st.download_button(
-                    "⬇️ Descargar Árbol Generalizado (PNG)",
-                    data=f.read(),
-                    file_name=nombre_imagen_global,
-                    mime="image/png"
-                )
+            # Descarga segura
+            st.download_button(
+                "⬇️ Descargar Árbol Generalizado (PNG)",
+                data=img_bytes,
+                file_name=nombre_imagen_global,
+                mime="image/png"
+            )
         else:
             st.warning(
                 f"No se encontró la imagen '{nombre_imagen_global}'. "
                 f"Asegúrate de tenerla en la carpeta."
             )
 
-# -----------------------------
-# Árbol especialista
-# -----------------------------
-st.subheader("🌳 Árbol Especialista Generado")
+    # -----------------------------
+    # Árbol especialista
+    # -----------------------------
+    st.subheader("🌳 Árbol Especialista Generado")
 
-try:
-    tree_ = modelo.tree_
-    cidx = idx_objetivo
+    try:
+        tree_ = modelo.tree_
+        cidx = idx_objetivo
 
-    # Recuperar keep_mask calculado en col1
-    keep_mask = st.session_state.get("keep_mask_especialista", None)
+        # Recuperar keep_mask calculado en col1
+        keep_mask = st.session_state.get("keep_mask_especialista", None)
 
-    # Condición de modo
-    modo_no_estricto = ("no estricto" in modo_arbol.lower())
+        modo_no_estricto = ("no estricto" in modo_arbol.lower())
 
-    # Construcción del grafo SOLO si hay nodos keep
-    if keep_mask is not None and keep_mask.any():
-        if modo_no_estricto:
-            g = build_compacted_graphviz_non_strict(
-                modelo=modelo,
-                clase=class_names[cidx],
-                tau=tau,
-                soporte=soporte_absoluto,
-                keep_mask=keep_mask,
-                feature_names=feat_names,
-                class_names_list=class_names,
-                color_clase=color_clase_hex
-            )
+        # Construir árbol SOLO si hay nodos válidos
+        if keep_mask is not None and keep_mask.any():
+            if modo_no_estricto:
+                g = build_compacted_graphviz_non_strict(
+                    modelo=modelo,
+                    clase=class_names[cidx],
+                    tau=tau,
+                    soporte=soporte_absoluto,
+                    keep_mask=keep_mask,
+                    feature_names=feat_names,
+                    class_names_list=class_names,
+                    color_clase=color_clase_hex
+                )
+            else:
+                g = build_compacted_graphviz_strict(
+                    modelo=modelo,
+                    clase=class_names[cidx],
+                    tau=tau,
+                    soporte=soporte_absoluto,
+                    keep_mask=keep_mask,
+                    feature_names=feat_names,
+                    class_names_list=class_names,
+                    color_clase=color_clase_hex
+                )
         else:
-            g = build_compacted_graphviz_strict(
-                modelo=modelo,
-                clase=class_names[cidx],
-                tau=tau,
-                soporte=soporte_absoluto,
-                keep_mask=keep_mask,
-                feature_names=feat_names,
-                class_names_list=class_names,
-                color_clase=color_clase_hex
-            )
-    else:
-        g = None
+            g = None
 
-    # Render seguro del árbol
-    if g is not None:
-        n_nodos = int(keep_mask.sum())
-
-        if n_nodos > MAX_NODOS_RENDER:
-            st.warning(
-                f"El árbol especialista tiene {n_nodos} nodos y es demasiado grande para "
-                "renderizarlo de forma segura.\n\n"
-                "Sugerencia: aumenta la **Confianza mínima** o el **Soporte mínimo** "
-                "para simplificar el árbol."
-            )
+        # Render seguro
+        if g is not None:
+            n_nodos = int(keep_mask.sum())
+            if n_nodos > MAX_NODOS_RENDER:
+                st.warning(
+                    f"El árbol especialista tiene {n_nodos} nodos y es demasiado grande "
+                    "para renderizarlo de forma segura.\n\n"
+                    "Sugerencia: aumenta la **Confianza mínima** o el **Soporte mínimo**."
+                )
+            else:
+                mostrar_dot_en_streamlit(g)
         else:
-            mostrar_dot_en_streamlit(g)
-    else:
-        st.info("Con los filtros actuales no se generó un árbol especialista (no hay reglas que cumplan).")
+            st.info(
+                "Con los filtros actuales no se generó un árbol especialista "
+                "(no hay reglas que cumplan)."
+            )
 
-except Exception as e:
-    st.error("Se produjo un error al construir/renderizar el árbol especialista.")
-    st.exception(e)
-    st.stop()
+    except Exception as e:
+        st.error("Se produjo un error al construir/renderizar el árbol especialista.")
+        st.exception(e)
+        st.stop()
+
 
 
    
