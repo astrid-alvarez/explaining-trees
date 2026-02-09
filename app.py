@@ -19,16 +19,19 @@ import streamlit.components.v1 as components
 # -----------------------------------------------------------------------------
 def mostrar_dot_en_streamlit(dot, height=820):
     """
-    Renderiza un graphviz.Digraph en SVG (evita bitmap gigante/cairo/PIL).
-    Sin fallback a PNG para evitar DecompressionBomb.
+    Renderiza SOLO en SVG.
+    Nunca intenta PNG (evita crash por imágenes gigantes).
     """
     try:
         svg_bytes = dot.pipe(format="svg")
-        components.html(svg_bytes.decode("utf-8"), height=height, scrolling=True)
+        components.html(
+            svg_bytes.decode("utf-8"),
+            height=height,
+            scrolling=True
+        )
     except Exception as e_svg:
-        st.error("No se pudo renderizar el árbol en SVG (posiblemente demasiado grande).")
-        st.caption(f"Detalle: {e_svg}")
-
+        st.error("No se pudo renderizar el árbol en SVG (demasiado grande o complejo).")
+        st.exception(e_svg)
 
 # -----------------------------------------------------------------------------
 # CONFIGURACIÓN Y ESTILOS
