@@ -1433,7 +1433,7 @@ with col2:
     # -----------------------------
     # TARJETA: ÁRBOL GENERALIZADO
     # -----------------------------
-    st.subheader("ÁRBOL GENERALIZADO")
+    st.subheader("🌳ÁRBOL GENERALIZADO")
     
     st.markdown(
         f"""
