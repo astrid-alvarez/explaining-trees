@@ -12,7 +12,10 @@ import os
 import math
 import matplotlib.pyplot as plt
 from PIL import Image
+import re
+import uuid
 import streamlit.components.v1 as components
+import streamlit as st
 from collections import Counter
 #import base64
 
@@ -20,54 +23,65 @@ from collections import Counter
 # -----------------------------------------------------------------------------
 # FUNCIÓN AUXILIAR: MOSTRAR DOT COMO PNG (para ver el árbol completo)
 # -----------------------------------------------------------------------------
-def mostrar_dot_en_streamlit(dot):
+def mostrar_dot_en_streamlit(dot, vh=85, height_px=900):
     """
     Renderiza el árbol SIN scroll y ajustado al viewport.
-    Usa SVG inline + JS para recalcular viewBox con el bbox real del dibujo.
+    Usa SVG inline y recalcula viewBox con el bbox real.
     """
     try:
         svg_bytes = dot.pipe(format="svg")
         svg = svg_bytes.decode("utf-8", errors="ignore")
 
-        # (opcional) quitar width/height fijos si existen, para que CSS mande
-        import re
+        # Quitar width/height fijos para que CSS mande
         svg = re.sub(r'\swidth="[^"]*"', "", svg, count=1)
         svg = re.sub(r'\sheight="[^"]*"', "", svg, count=1)
 
-        # Metemos el SVG inline y luego con JS recalculamos viewBox usando getBBox()
+        wrap_id = f"wrap_{uuid.uuid4().hex}"
+
         html = f"""
-        <div id="wrap" style="width:100%; height:85vh; margin:0; padding:0; overflow:hidden;">
+        <div id="{wrap_id}" style="width:100%; height:{vh}vh; margin:0; padding:0; overflow:hidden;">
           {svg}
         </div>
 
         <script>
           (function() {{
-            const wrap = document.getElementById("wrap");
+            const wrap = document.getElementById("{wrap_id}");
+            if (!wrap) return;
+
             const svg = wrap.querySelector("svg");
             if (!svg) return;
 
-            // CSS manda
             svg.style.width = "100%";
             svg.style.height = "100%";
             svg.style.display = "block";
             svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-            // Esperar a que el SVG esté “listo” para medir bbox
-            // (Graphviz usa <g> con transform; bbox ya lo captura)
-            try {{
-              const bbox = svg.getBBox();
-              if (bbox && bbox.width > 0 && bbox.height > 0) {{
-                svg.setAttribute("viewBox", `${{bbox.x}} ${{bbox.y}} ${{bbox.width}} ${{bbox.height}}`);
-              }}
-            }} catch (e) {{
-              // si getBBox falla, no hacemos nada (igual se verá algo)
+            function fitViewBox() {{
+              try {{
+                const bbox = svg.getBBox();
+                if (bbox && bbox.width > 0 && bbox.height > 0) {{
+                  svg.setAttribute("viewBox", `${{bbox.x}} ${{bbox.y}} ${{bbox.width}} ${{bbox.height}}`);
+                }}
+              }} catch (e) {{}}
             }}
+
+            // Asegurar que mida cuando el SVG ya está listo
+            requestAnimationFrame(() => {{
+              fitViewBox();
+              setTimeout(fitViewBox, 50);
+              setTimeout(fitViewBox, 250);
+            }});
+
+            // Recalcular si cambia el tamaño del contenedor (responsive)
+            try {{
+              const ro = new ResizeObserver(() => fitViewBox());
+              ro.observe(wrap);
+            }} catch(e) {{}}
           }})();
         </script>
         """
 
-        # IMPORTANTE: height del iframe >= alto real del contenedor
-        components.html(html, height=900, scrolling=False)
+        components.html(html, height=height_px, scrolling=False)
 
     except Exception as e:
         st.error(f"Error al renderizar el árbol en SVG: {e}")
