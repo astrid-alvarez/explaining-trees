@@ -1427,14 +1427,31 @@ with col2:
         max_depth = int(t.max_depth)
         n_leaves = int(np.sum(t.children_left == -1))
         return max_depth, n_nodes, n_leaves
-
+    
     max_depth, n_nodes, n_leaves = resumen_arbol(modelo)
-
-    st.caption(
-        f"Resumen del árbol: profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}."
+    
+    # -----------------------------
+    # TARJETA: ÁRBOL GENERALIZADO
+    # -----------------------------
+    st.subheader("ÁRBOL GENERALIZADO")
+    
+    st.markdown(
+        f"""
+        <div style="background-color:#FFFFFF;
+                    padding:10px 14px;
+                    border-radius:10px;
+                    color:black;
+                    font-size:0.92rem;
+                    border: 1px solid #e0e0e0;">
+            Resumen del árbol: profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}.
+        </div>
+        """,
+        unsafe_allow_html=True
     )
+    
     if max_depth >= 12:
         st.info("Árbol profundo: puede ser difícil de leer ampliando, descarga el Árbol Generalizado (PNG).")
+
 
     # -----------------------------
     # Árbol generalizado (comparación) + descarga PNG
