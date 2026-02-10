@@ -36,7 +36,7 @@ def mostrar_dot_en_streamlit(dot):
 
         # Metemos el SVG inline y luego con JS recalculamos viewBox usando getBBox()
         html = f"""
-        <div id="wrap" style="width:100%; height:78vh; margin:0; padding:0; overflow:hidden;">
+        <div id="wrap" style="width:100%; height:85vh; margin:0; padding:0; overflow:hidden;">
           {svg}
         </div>
 
@@ -67,7 +67,7 @@ def mostrar_dot_en_streamlit(dot):
         """
 
         # IMPORTANTE: height del iframe >= alto real del contenedor
-        components.html(html, height=820, scrolling=False)
+        components.html(html, height=900, scrolling=False)
 
     except Exception as e:
         st.error(f"Error al renderizar el árbol en SVG: {e}")
