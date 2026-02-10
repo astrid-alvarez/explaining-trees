@@ -22,81 +22,56 @@ from collections import Counter
 # -----------------------------------------------------------------------------
 def mostrar_dot_en_streamlit(dot):
     """
-    Renderiza el árbol especialista SIN scroll y encajado al tamaño visible.
-    Estrategia:
-      1) SVG inline con viewBox + preserveAspectRatio=meet (FIT a ancho y alto).
-      2) Si falla, fallback PNG (pero puede fallar en árboles gigantes).
+    Renderiza el árbol SIN scroll y ajustado al viewport.
+    Usa SVG inline + JS para recalcular viewBox con el bbox real del dibujo.
     """
-    # -------------------------
-    # 1) SVG inline (FIT real)
-    # -------------------------
     try:
         svg_bytes = dot.pipe(format="svg")
         svg = svg_bytes.decode("utf-8", errors="ignore")
 
-        # Asegurar que el SVG tenga viewBox (para que el fit sea real)
-        # Graphviz suele incluir width/height; si no hay viewBox, lo fabricamos.
-        if "viewBox=" not in svg:
-            # Buscar width y height (Graphviz suele poner algo como width="123pt")
-            import re
-            m_w = re.search(r'width="([\d\.]+)pt"', svg)
-            m_h = re.search(r'height="([\d\.]+)pt"', svg)
-            if m_w and m_h:
-                w = float(m_w.group(1))
-                h = float(m_h.group(1))
-                # Insertar viewBox en la etiqueta <svg ...>
-                svg = re.sub(
-                    r"<svg\b",
-                    f'<svg viewBox="0 0 {w:.3f} {h:.3f}"',
-                    svg,
-                    count=1
-                )
-
-        # Quitar width/height fijos para que CSS mande
+        # (opcional) quitar width/height fijos si existen, para que CSS mande
         import re
         svg = re.sub(r'\swidth="[^"]*"', "", svg, count=1)
         svg = re.sub(r'\sheight="[^"]*"', "", svg, count=1)
 
-        # Forzar preserveAspectRatio meet y tamaños responsivos
-        # (si ya existe preserveAspectRatio, lo reemplazamos)
-        if "preserveAspectRatio=" in svg:
-            svg = re.sub(
-                r'preserveAspectRatio="[^"]*"',
-                'preserveAspectRatio="xMidYMid meet"',
-                svg,
-                count=1
-            )
-        else:
-            svg = svg.replace("<svg", '<svg preserveAspectRatio="xMidYMid meet"', 1)
-
+        # Metemos el SVG inline y luego con JS recalculamos viewBox usando getBBox()
         html = f"""
-        <div style="width:100%; height:72vh; padding:0; margin:0;">
-          {svg.replace("<svg", '<svg style="width:100%; height:100%; display:block;"', 1)}
+        <div id="wrap" style="width:100%; height:78vh; margin:0; padding:0; overflow:hidden;">
+          {svg}
         </div>
+
+        <script>
+          (function() {{
+            const wrap = document.getElementById("wrap");
+            const svg = wrap.querySelector("svg");
+            if (!svg) return;
+
+            // CSS manda
+            svg.style.width = "100%";
+            svg.style.height = "100%";
+            svg.style.display = "block";
+            svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+            // Esperar a que el SVG esté “listo” para medir bbox
+            // (Graphviz usa <g> con transform; bbox ya lo captura)
+            try {{
+              const bbox = svg.getBBox();
+              if (bbox && bbox.width > 0 && bbox.height > 0) {{
+                svg.setAttribute("viewBox", `${{bbox.x}} ${{bbox.y}} ${{bbox.width}} ${{bbox.height}}`);
+              }}
+            }} catch (e) {{
+              // si getBBox falla, no hacemos nada (igual se verá algo)
+            }}
+          }})();
+        </script>
         """
 
-        components.html(html, height=720, scrolling=False)
-        return
+        # IMPORTANTE: height del iframe >= alto real del contenedor
+        components.html(html, height=820, scrolling=False)
 
-    except Exception:
-        pass
+    except Exception as e:
+        st.error(f"Error al renderizar el árbol en SVG: {e}")
 
-    # -------------------------
-    # 2) Fallback PNG (riesgoso)
-    # -------------------------
-    try:
-        # bajar dpi para reducir tamaño (pero no siempre alcanza en BD4)
-        try:
-            dot.graph_attr["dpi"] = "110"
-        except Exception:
-            pass
-
-        png_bytes = dot.pipe(format="png")
-        st.image(png_bytes, use_container_width=True)
-
-    except Exception as e_png:
-        st.error("Error al renderizar el árbol (SVG y PNG fallaron).")
-        st.caption(f"Detalle: {e_png}")
 
 
 
