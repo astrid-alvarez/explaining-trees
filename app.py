@@ -39,49 +39,51 @@ def mostrar_dot_en_streamlit(dot, vh=85, height_px=900):
         wrap_id = f"wrap_{uuid.uuid4().hex}"
 
         html = f"""
-        <div id="{wrap_id}" style="width:100%; height:{vh}vh; margin:0; padding:0; overflow:hidden;">
+        <div id="{wrap_id}" style="width:100%; min-height:420px; height:auto; margin:0; padding:0; overflow:hidden;">
           {svg}
         </div>
-
+        
         <script>
-          (function() {{
-            const wrap = document.getElementById("{wrap_id}");
-            if (!wrap) return;
-
-            const svg = wrap.querySelector("svg");
-            if (!svg) return;
-
-            svg.style.width = "100%";
-            svg.style.height = "100%";
-            svg.style.display = "block";
-            svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-
-            function fitViewBox() {{
-              try {{
-                const bbox = svg.getBBox();
-                if (bbox && bbox.width > 0 && bbox.height > 0) {{
-                  svg.setAttribute("viewBox", `${{bbox.x}} ${{bbox.y}} ${{bbox.width}} ${{bbox.height}}`);
-                }}
-              }} catch (e) {{}}
-            }}
-
-            // Asegurar que mida cuando el SVG ya está listo
-            requestAnimationFrame(() => {{
-              fitViewBox();
-              setTimeout(fitViewBox, 50);
-              setTimeout(fitViewBox, 250);
-            }});
-
-            // Recalcular si cambia el tamaño del contenedor (responsive)
+        (function() {{
+          const wrap = document.getElementById("{wrap_id}");
+          if (!wrap) return;
+          const svg = wrap.querySelector("svg");
+          if (!svg) return;
+        
+          svg.style.width = "100%";
+          svg.style.height = "100%";
+          svg.style.display = "block";
+          svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        
+          function fit() {{
             try {{
-              const ro = new ResizeObserver(() => fitViewBox());
-              ro.observe(wrap);
+              const bbox = svg.getBBox();
+              if (bbox && bbox.width > 0 && bbox.height > 0) {{
+                svg.setAttribute("viewBox", `${{bbox.x}} ${{bbox.y}} ${{bbox.width}} ${{bbox.height}}`);
+        
+                const wrapWidth = wrap.clientWidth || 1000;
+                const maxH = Math.floor(window.innerHeight * 0.85);
+                const h = Math.max(420, Math.min(maxH, (bbox.height / bbox.width) * wrapWidth));
+                wrap.style.height = h + "px";
+              }}
             }} catch(e) {{}}
-          }})();
+          }}
+        
+          requestAnimationFrame(() => {{
+            fit();
+            setTimeout(fit, 50);
+            setTimeout(fit, 250);
+          }});
+        
+          try {{
+            const ro = new ResizeObserver(() => fit());
+            ro.observe(wrap);
+          }} catch(e) {{}}
+        }})();
         </script>
         """
+        components.html(html, height=950, scrolling=False)
 
-        components.html(html, height=height_px, scrolling=False)
 
     except Exception as e:
         st.error(f"Error al renderizar el árbol en SVG: {e}")
