@@ -21,32 +21,37 @@ import streamlit.components.v1 as components
 # -----------------------------------------------------------------------------
 def mostrar_dot_en_streamlit(dot):
     """
-    Renderiza el árbol especialista de forma segura.
-    1) Intenta SVG embebido (evita límite de píxeles / Pillow).
-    2) Si falla, intenta PNG con DPI reducido.
+    Renderiza el árbol especialista de forma segura y SIN barras de desplazamiento.
+    - Primero intenta SVG escalado a ancho del contenedor.
+    - Si falla, usa PNG con DPI reducido (fallback).
     """
-    # 1) SVG (recomendado para árboles grandes)
+    # 1) SVG (escalado a ancho, sin scroll)
     try:
         svg_bytes = dot.pipe(format="svg")
-        svg = svg_bytes.decode("utf-8", errors="ignore")
+
+        # Importante: embebemos el SVG como <img> para que escale responsivamente
+        b64 = base64.b64encode(svg_bytes).decode("utf-8")
 
         components.html(
             f"""
-            <div style="width:100%; overflow:auto; border:1px solid #ddd; padding:8px; border-radius:8px;">
-              {svg}
+            <div style="width:100%; margin:0; padding:0;">
+              <img
+                src="data:image/svg+xml;base64,{b64}"
+                style="width:100%; height:auto; display:block;"
+                alt="Árbol especialista (SVG)"
+              />
             </div>
             """,
-            height=700,
-            scrolling=True
+            height=720,   # ajusta este número si quieres más/menos alto visible
+            scrolling=False
         )
         return
-    except Exception as e_svg:
-        # seguimos a PNG como fallback
+
+    except Exception:
         pass
 
-    # 2) PNG fallback (más liviano reduciendo DPI)
+    # 2) PNG fallback (por si SVG falla)
     try:
-        # Baja DPI antes de renderizar (reduce tamaño de imagen)
         try:
             dot.graph_attr["dpi"] = "120"
         except Exception:
@@ -54,9 +59,11 @@ def mostrar_dot_en_streamlit(dot):
 
         png_bytes = dot.pipe(format="png")
         st.image(png_bytes, use_container_width=True)
+
     except Exception as e_png:
         st.error("Error al renderizar el árbol (SVG y PNG fallaron).")
         st.caption(f"Detalle: {e_png}")
+
 
 
 # -----------------------------------------------------------------------------
