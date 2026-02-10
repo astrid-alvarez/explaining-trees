@@ -13,18 +13,51 @@ import math
 import matplotlib.pyplot as plt
 from PIL import Image
 from collections import Counter
+import base64
+import streamlit.components.v1 as components
+
 # -----------------------------------------------------------------------------
 # FUNCIÓN AUXILIAR: MOSTRAR DOT COMO PNG (para ver el árbol completo)
 # -----------------------------------------------------------------------------
 def mostrar_dot_en_streamlit(dot):
     """
-    Renderiza un grafo graphviz.Digraph a PNG y lo muestra completo en Streamlit.
+    Renderiza el árbol especialista de forma segura.
+    1) Intenta SVG embebido (evita límite de píxeles / Pillow).
+    2) Si falla, intenta PNG con DPI reducido.
     """
+    # 1) SVG (recomendado para árboles grandes)
     try:
-        png_bytes = dot.pipe(format="png")  # resolución controlada en graph_attr
+        svg_bytes = dot.pipe(format="svg")
+        svg = svg_bytes.decode("utf-8", errors="ignore")
+
+        components.html(
+            f"""
+            <div style="width:100%; overflow:auto; border:1px solid #ddd; padding:8px; border-radius:8px;">
+              {svg}
+            </div>
+            """,
+            height=700,
+            scrolling=True
+        )
+        return
+    except Exception as e_svg:
+        # seguimos a PNG como fallback
+        pass
+
+    # 2) PNG fallback (más liviano reduciendo DPI)
+    try:
+        # Baja DPI antes de renderizar (reduce tamaño de imagen)
+        try:
+            dot.graph_attr["dpi"] = "120"
+        except Exception:
+            pass
+
+        png_bytes = dot.pipe(format="png")
         st.image(png_bytes, use_container_width=True)
-    except Exception as e:
-        st.error(f"Error al renderizar el árbol en PNG: {e}")
+    except Exception as e_png:
+        st.error("Error al renderizar el árbol (SVG y PNG fallaron).")
+        st.caption(f"Detalle: {e_png}")
+
 
 # -----------------------------------------------------------------------------
 # CONFIGURACIÓN Y ESTILOS
