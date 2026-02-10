@@ -12,48 +12,82 @@ import os
 import math
 import matplotlib.pyplot as plt
 from PIL import Image
-from collections import Counter
-import base64
 import streamlit.components.v1 as components
+from collections import Counter
+#import base64
+
 
 # -----------------------------------------------------------------------------
 # FUNCIÓN AUXILIAR: MOSTRAR DOT COMO PNG (para ver el árbol completo)
 # -----------------------------------------------------------------------------
 def mostrar_dot_en_streamlit(dot):
     """
-    Renderiza el árbol especialista de forma segura y SIN barras de desplazamiento.
-    - Primero intenta SVG escalado a ancho del contenedor.
-    - Si falla, usa PNG con DPI reducido (fallback).
+    Renderiza el árbol especialista SIN scroll y encajado al tamaño visible.
+    Estrategia:
+      1) SVG inline con viewBox + preserveAspectRatio=meet (FIT a ancho y alto).
+      2) Si falla, fallback PNG (pero puede fallar en árboles gigantes).
     """
-    # 1) SVG (escalado a ancho, sin scroll)
+    # -------------------------
+    # 1) SVG inline (FIT real)
+    # -------------------------
     try:
         svg_bytes = dot.pipe(format="svg")
+        svg = svg_bytes.decode("utf-8", errors="ignore")
 
-        # Importante: embebemos el SVG como <img> para que escale responsivamente
-        b64 = base64.b64encode(svg_bytes).decode("utf-8")
+        # Asegurar que el SVG tenga viewBox (para que el fit sea real)
+        # Graphviz suele incluir width/height; si no hay viewBox, lo fabricamos.
+        if "viewBox=" not in svg:
+            # Buscar width y height (Graphviz suele poner algo como width="123pt")
+            import re
+            m_w = re.search(r'width="([\d\.]+)pt"', svg)
+            m_h = re.search(r'height="([\d\.]+)pt"', svg)
+            if m_w and m_h:
+                w = float(m_w.group(1))
+                h = float(m_h.group(1))
+                # Insertar viewBox en la etiqueta <svg ...>
+                svg = re.sub(
+                    r"<svg\b",
+                    f'<svg viewBox="0 0 {w:.3f} {h:.3f}"',
+                    svg,
+                    count=1
+                )
 
-        components.html(
-            f"""
-            <div style="width:100%; margin:0; padding:0;">
-              <img
-                src="data:image/svg+xml;base64,{b64}"
-                style="width:100%; height:auto; display:block;"
-                alt="Árbol especialista (SVG)"
-              />
-            </div>
-            """,
-            height=720,   # ajusta este número si quieres más/menos alto visible
-            scrolling=False
-        )
+        # Quitar width/height fijos para que CSS mande
+        import re
+        svg = re.sub(r'\swidth="[^"]*"', "", svg, count=1)
+        svg = re.sub(r'\sheight="[^"]*"', "", svg, count=1)
+
+        # Forzar preserveAspectRatio meet y tamaños responsivos
+        # (si ya existe preserveAspectRatio, lo reemplazamos)
+        if "preserveAspectRatio=" in svg:
+            svg = re.sub(
+                r'preserveAspectRatio="[^"]*"',
+                'preserveAspectRatio="xMidYMid meet"',
+                svg,
+                count=1
+            )
+        else:
+            svg = svg.replace("<svg", '<svg preserveAspectRatio="xMidYMid meet"', 1)
+
+        html = f"""
+        <div style="width:100%; height:72vh; padding:0; margin:0;">
+          {svg.replace("<svg", '<svg style="width:100%; height:100%; display:block;"', 1)}
+        </div>
+        """
+
+        components.html(html, height=720, scrolling=False)
         return
 
     except Exception:
         pass
 
-    # 2) PNG fallback (por si SVG falla)
+    # -------------------------
+    # 2) Fallback PNG (riesgoso)
+    # -------------------------
     try:
+        # bajar dpi para reducir tamaño (pero no siempre alcanza en BD4)
         try:
-            dot.graph_attr["dpi"] = "120"
+            dot.graph_attr["dpi"] = "110"
         except Exception:
             pass
 
