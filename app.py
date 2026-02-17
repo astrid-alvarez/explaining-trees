@@ -1475,10 +1475,10 @@ with col2:
     # Árbol generalizado (comparación) + descarga PNG
     # -----------------------------
     with st.expander("🆚 Comparar con Árbol Generalizado (Clic para desplegar)", expanded=False):
-        #st.markdown(f"### Árbol Generalizado: {nombre_bd}")
-        st.markdown(f"### {nombre_bd}")
-        #st.write("Estructura original completa del modelo global.")
-        st.markdown(
+
+    st.markdown(f"### {nombre_bd}")
+
+    st.markdown(
         """
         <div style="background-color:#f8f9fa;
                     padding:10px 14px;
@@ -1494,50 +1494,57 @@ with col2:
         </div>
         """,
         unsafe_allow_html=True
+    )
+
+    # -----------------------------
+    # Variables más influyentes (Árbol Generalizado)
+    # -----------------------------
+    st.markdown("**Variables más influyentes (árbol generalizado):**")
+
+    try:
+        top_vars_global = top_variables_generalizado(
+            tree_=modelo.tree_,
+            feature_names=feat_names,
+            topk=5
         )
-        # -----------------------------
-        # Variables más influyentes (Árbol Generalizado)
-        # -----------------------------
-       st.markdown("**Variables más influyentes (árbol generalizado):**")
-       try:
-            top_vars_global = top_variables_generalizado(
-                tree_=modelo.tree_,
-                feature_names=feat_names,
-                topk=5
-            )
-            if len(top_vars_global) == 0:
-                st.caption("—")
-            else:
-                for v in top_vars_global:
-                    st.markdown(f"- `{v}`")
-        except Exception as e:
+
+        if len(top_vars_global) == 0:
             st.caption("—")
-            st.warning(f"No fue posible calcular variables influyentes del árbol generalizado: {e}")
-
-
-        prefijo_bd = nombre_bd.split('_')[0]
-        nombre_imagen_global = f"ARBOL_GENERALIZADO_{prefijo_bd}.png"
-
-        if os.path.exists(nombre_imagen_global):
-            st.image(
-                nombre_imagen_global,
-                caption=f"Modelo Generalizado - {prefijo_bd}",
-                use_container_width=True
-            )
-
-            # Botón de descarga (PNG)
-            with open(nombre_imagen_global, "rb") as f:
-                st.download_button(
-                    "⬇️ Descargar Árbol Generalizado (PNG)",
-                    data=f.read(),
-                    file_name=nombre_imagen_global,
-                    mime="image/png"
-                )
         else:
-            st.warning(
-                f"No se encontró la imagen '{nombre_imagen_global}'. "
-                f"Asegúrate de tenerla en la carpeta."
+            for v in top_vars_global:
+                st.markdown(f"- `{v}`")
+
+    except Exception as e:
+        st.caption("—")
+        st.warning(
+            f"No fue posible calcular variables influyentes del árbol generalizado: {e}"
+        )
+
+    prefijo_bd = nombre_bd.split('_')[0]
+    nombre_imagen_global = f"ARBOL_GENERALIZADO_{prefijo_bd}.png"
+
+    if os.path.exists(nombre_imagen_global):
+
+        st.image(
+            nombre_imagen_global,
+            caption=f"Modelo Generalizado - {prefijo_bd}",
+            use_container_width=True
+        )
+
+        with open(nombre_imagen_global, "rb") as f:
+            st.download_button(
+                "⬇️ Descargar Árbol Generalizado (PNG)",
+                data=f.read(),
+                file_name=nombre_imagen_global,
+                mime="image/png"
             )
+
+    else:
+        st.warning(
+            f"No se encontró la imagen '{nombre_imagen_global}'. "
+            f"Asegúrate de tenerla en la carpeta."
+        )
+
 
     # -----------------------------
     # Árbol especialista
