@@ -1454,8 +1454,7 @@ with col2:
     st.subheader("🌳ÁRBOL GENERALIZADO")
        
     st.markdown(
-        f"""
-    <div style="background-color:#FFFFFF;
+        f""" <div style="background-color:#FFFFFF;
                 padding:14px 16px;
                 border-radius:10px;
                 color:black;
@@ -1472,9 +1471,8 @@ with col2:
             Las explicaciones por clase se presentan mediante el Árbol Especialista.
         </div>
     
-    </div>
-    """,
-       unsafe_allow_html=True
+    </div> """,
+    unsafe_allow_html=True
     )
  
     if max_depth >= 12:
