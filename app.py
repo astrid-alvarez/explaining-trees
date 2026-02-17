@@ -1428,7 +1428,7 @@ with col1:
             st.caption("—")
         else:
             for v in top_vars:
-                st.markdown(f"- `{v}`")
+                st.markdown(f"- {v}")
     else:
         st.caption("—")
 
@@ -1469,7 +1469,7 @@ with col2:
     
       <div style="font-size:0.85rem; color:#555;">
         Este árbol corresponde al modelo completo entrenado, sin aplicar filtros ni umbrales.
-        Las explicaciones por clase se presentan mediante el Árbol Especialista usando los filtros de simplificación.
+        Las explicaciones por clase se presentan mediante el Árbol Especialista usando: 3. Filtros de Simplificación.
       </div>
     </div>
     """
@@ -1505,7 +1505,7 @@ with col2:
                 st.caption("—")
             else:
                 for v in top_vars_global:
-                    st.markdown(f"- `{v}`")
+                    st.markdown(f"- {v}")
     
         except Exception as e:
             st.caption("—")
