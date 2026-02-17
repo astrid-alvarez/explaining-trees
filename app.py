@@ -1457,8 +1457,9 @@ with col2:
     # Árbol generalizado (comparación) + descarga PNG
     # -----------------------------
     with st.expander("🆚 Comparar con Árbol Generalizado (Clic para desplegar)", expanded=False):
-        st.markdown(f"### Árbol Generalizado Completo: {nombre_bd}")
-        st.write("Estructura original completa del modelo global.")
+        #st.markdown(f"### Árbol Generalizado: {nombre_bd}")
+        st.markdown(f"### {nombre_bd}")
+        #st.write("Estructura original completa del modelo global.")
         st.markdown(
         """
         <div style="background-color:#f8f9fa;
