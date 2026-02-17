@@ -1472,12 +1472,27 @@ with col2:
                     margin:10px 0 14px 0;
                     box-shadow:0 1px 2px rgba(0,0,0,0.10);">
           Este árbol corresponde al modelo completo entrenado, sin aplicar filtros ni umbrales, 
-          las explicaciones por clase se presentan mediante el Árbol Especialista, que es una simplificación controlada de este árbol.
+          las explicaciones por clase se presentan mediante el Árbol Especialista.
         </div>
         """,
         unsafe_allow_html=True
         )
-
+        # -----------------------------
+        # Variables más influyentes (Árbol Generalizado)
+        # -----------------------------
+        st.markdown("**Variables más influyentes (árbol generalizado):**")
+        
+        top_vars_global = top_variables_generalizado(
+            tree_=modelo.tree_,
+            feature_names=feat_names,
+            topk=5
+        )
+        
+        if len(top_vars_global) == 0:
+            st.caption("—")
+        else:
+            for v in top_vars_global:
+                st.markdown(f"- `{v}`")
 
         prefijo_bd = nombre_bd.split('_')[0]
         nombre_imagen_global = f"ARBOL_GENERALIZADO_{prefijo_bd}.png"
