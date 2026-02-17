@@ -239,7 +239,7 @@ INFO_EXTRA = {
 st.title("PLATAFORMA DE EVALUACIÓN XAI: ÁRBOLES ESPECIALISTAS")
 st.markdown(
     "<p style='font-size:0.95rem'><b>Objetivo:</b> "
-    "Evaluar la explicabilidad de las explicaciones por clase.</p>",
+    "Evaluar la explicabilidad de árboles generados por clase.</p>",
     unsafe_allow_html=True
 )
 
