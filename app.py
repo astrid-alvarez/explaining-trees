@@ -1247,6 +1247,24 @@ def build_compacted_graphviz_strict(modelo, clase, tau, soporte,
     draw(root_id, parent_p=0.0)
     return dot
 
+def top_variables_generalizado(tree_, feature_names, topk=5):
+    """
+    Variables más influyentes del ÁRBOL GENERALIZADO.
+    Mismo criterio del especialista: cuenta cuántas veces aparece cada variable
+    en nodos internos (no hojas).
+    """
+    counts = Counter()
+
+    for u in range(tree_.node_count):
+        if tree_.children_left[u] == -1:
+            continue  # ignorar hojas
+        feat_idx = int(tree_.feature[u])
+        if 0 <= feat_idx < len(feature_names):
+            counts[feature_names[feat_idx]] += 1
+
+    return [name for name, _ in counts.most_common(topk)]
+
+
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA IZQUIERDA (CONTROL Y FILTRADO)
 # -----------------------------------------------------------------------------
@@ -1480,19 +1498,22 @@ with col2:
         # -----------------------------
         # Variables más influyentes (Árbol Generalizado)
         # -----------------------------
-        st.markdown("**Variables más influyentes (árbol generalizado):**")
-        
-        top_vars_global = top_variables_generalizado(
-            tree_=modelo.tree_,
-            feature_names=feat_names,
-            topk=5
-        )
-        
-        if len(top_vars_global) == 0:
+       st.markdown("**Variables más influyentes (árbol generalizado):**")
+        try:
+            top_vars_global = top_variables_generalizado(
+                tree_=modelo.tree_,
+                feature_names=feat_names,
+                topk=5
+            )
+            if len(top_vars_global) == 0:
+                st.caption("—")
+            else:
+                for v in top_vars_global:
+                    st.markdown(f"- `{v}`")
+        except Exception as e:
             st.caption("—")
-        else:
-            for v in top_vars_global:
-                st.markdown(f"- `{v}`")
+            st.warning(f"No fue posible calcular variables influyentes del árbol generalizado: {e}")
+
 
         prefijo_bd = nombre_bd.split('_')[0]
         nombre_imagen_global = f"ARBOL_GENERALIZADO_{prefijo_bd}.png"
