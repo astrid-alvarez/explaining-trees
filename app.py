@@ -1459,6 +1459,20 @@ with col2:
     with st.expander("🆚 Comparar con Árbol Generalizado (Clic para desplegar)", expanded=False):
         st.markdown(f"### Árbol Generalizado Completo: {nombre_bd}")
         st.write("Estructura original completa del modelo global.")
+        st.markdown(
+            """
+            <div style="background-color:#f8f9fa;
+                        padding:10px 14px;
+                        border-radius:8px;
+                        font-size:0.85rem;
+                        line-height:1.4;
+                        border-left:4px solid #999;">
+           Este árbol corresponde al modelo completo entrenado, sin aplicar filtros ni umbrales, 
+           las explicaciones por clase se presentan mediante el Árbol Especialista, que es una simplificación controlada de este árbol..
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         prefijo_bd = nombre_bd.split('_')[0]
         nombre_imagen_global = f"ARBOL_GENERALIZADO_{prefijo_bd}.png"
