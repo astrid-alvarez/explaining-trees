@@ -1414,7 +1414,7 @@ with col1:
      # -----------------------------
     # Variables más influyentes (árbol especialista)
     # -----------------------------
-    st.markdown("**Variables más influyentes (árbol especialista):**")
+    st.markdown("**Variables más influyentes (Árbol Especialista):**")
 
     if keep_mask is not None and keep_mask.any():
         top_vars = top_variables_influyentes(
@@ -1492,7 +1492,7 @@ with col2:
         # -----------------------------
         # Variables más influyentes (Árbol Generalizado)
         # -----------------------------
-        st.markdown("**Variables más influyentes (árbol generalizado):**")
+        st.markdown("**Variables más influyentes (Árbol Generalizado):**")
     
         try:
             top_vars_global = top_variables_generalizado(
