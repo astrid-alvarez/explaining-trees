@@ -1452,20 +1452,31 @@ with col2:
     # TARJETA: ÁRBOL GENERALIZADO
     # -----------------------------
     st.subheader("🌳ÁRBOL GENERALIZADO")
-    
+      
     st.markdown(
         f"""
         <div style="background-color:#FFFFFF;
-                    padding:10px 14px;
+                    padding:14px 16px;
                     border-radius:10px;
                     color:black;
                     font-size:0.92rem;
-                    border: 1px solid #e0e0e0;">
-            Resumen del árbol: profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}.
+                    border: 1px solid #e0e0e0;
+                    line-height:1.45;">
+    
+            <div style="margin-bottom:8px;">
+                <b>Resumen del árbol:</b> profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}.
+            </div>
+    
+            <div style="font-size:0.85rem; color:#555;">
+                Este árbol corresponde al modelo completo entrenado, sin aplicar filtros ni umbrales. 
+                Las explicaciones por clase se presentan mediante el Árbol Especialista.
+            </div>
+    
         </div>
         """,
         unsafe_allow_html=True
     )
+
     
     if max_depth >= 12:
         st.info("Árbol profundo: puede ser difícil de leer ampliando, descarga el Árbol Generalizado (PNG).")
@@ -1478,24 +1489,7 @@ with col2:
 
         st.markdown(f"### {nombre_bd}")
     
-        st.markdown(
-            """
-            <div style="background-color:#f8f9fa;
-                        padding:10px 14px;
-                        border-radius:10px;
-                        font-size:0.85rem;
-                        line-height:1.4;
-                        border-left:4px solid #999;
-                        color:#111;
-                        margin:10px 0 14px 0;
-                        box-shadow:0 1px 2px rgba(0,0,0,0.10);">
-              Este árbol corresponde al modelo completo entrenado, sin aplicar filtros ni umbrales, 
-              las explicaciones por clase se presentan mediante el Árbol Especialista.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
+ 
         # -----------------------------
         # Variables más influyentes (Árbol Generalizado)
         # -----------------------------
