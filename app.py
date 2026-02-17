@@ -1264,6 +1264,66 @@ def top_variables_generalizado(tree_, feature_names, topk=5):
 
     return [name for name, _ in counts.most_common(topk)]
 
+import math
+import textwrap
+
+def regla_destacada_balance(modelo, keep_mask, class_idx, feature_names, class_label, top_lines=8):
+    """
+    Selecciona la 'regla más fuerte' usando balance confianza–soporte:
+        score = p(clase) * log(1 + samples)
+
+    Usa SOLO hojas que estén dentro de keep_mask (o sea, del árbol especialista actual).
+    Devuelve None si no hay reglas.
+    """
+    tree_ = modelo.tree_
+
+    # 1) Paths por hoja (solo hojas keep)
+    paths = _get_paths_for_class(tree_, keep_mask)
+    if not paths:
+        return None
+
+    best = None
+
+    for leaf_id, path in paths.items():
+        # leaf_id debe ser hoja; por seguridad:
+        if tree_.children_left[leaf_id] != -1:
+            continue
+
+        w, probs, samples = _node_counts_and_probvec(tree_, leaf_id)
+        if samples <= 0 or probs.size == 0:
+            continue
+
+        p_c = float(probs[class_idx])
+        score = p_c * math.log1p(samples)
+
+        # compactar condiciones del path
+        conds = _compact_path_to_intervals(path, feature_names)
+        cond_texts = [c["text"] for c in conds]
+
+        # guardar mejor
+        if (best is None) or (score > best["score"]):
+            best = {
+                "leaf_id": int(leaf_id),
+                "p_c": p_c,
+                "samples": int(samples),
+                "score": float(score),
+                "conds": cond_texts,
+                "class_label": str(class_label)
+            }
+
+    if best is None:
+        return None
+
+    # limitar para no hacer la tarjeta eterna
+    if len(best["conds"]) > top_lines:
+        best["conds_recortadas"] = best["conds"][:top_lines]
+        best["n_conds_extra"] = len(best["conds"]) - top_lines
+    else:
+        best["conds_recortadas"] = best["conds"]
+        best["n_conds_extra"] = 0
+
+    return best
+
 
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA IZQUIERDA (CONTROL Y FILTRADO)
@@ -1538,64 +1598,131 @@ with col2:
                 f"Asegúrate de tenerla en la carpeta."
             )
 
-
     # -----------------------------
-    # Árbol especialista
-    # -----------------------------
-    st.subheader("🌳 ÁRBOL ESPECIALISTA")
+# Árbol especialista
+# -----------------------------
+st.subheader("🌳 ÁRBOL ESPECIALISTA")
 
-    tree_ = modelo.tree_
-    cidx = idx_objetivo
+tree_ = modelo.tree_
+cidx = idx_objetivo
 
-    # Condición robusta (no depende de mayúsculas/minúsculas exactas)
-    modo_no_estricto = ("no estricto" in modo_arbol.lower()) or ("no" in modo_arbol.lower() and "estrict" in modo_arbol.lower())
+# Condición robusta (no depende de mayúsculas/minúsculas exactas)
+modo_no_estricto = ("no estricto" in modo_arbol.lower()) or (
+    "no" in modo_arbol.lower() and "estrict" in modo_arbol.lower()
+)
 
-    if modo_no_estricto:
-        keep_mask = _keep_mask_non_strict(
-            tree_,
-            cidx,
-            tau,
-            min_samples_to_keep=soporte_absoluto
+if modo_no_estricto:
+    keep_mask = _keep_mask_non_strict(
+        tree_,
+        cidx,
+        tau,
+        min_samples_to_keep=soporte_absoluto
+    )
+    st.caption(f"Modo NO estricto: nodos_keep={int(keep_mask.sum())}")
+
+    if keep_mask.any():
+        g = build_compacted_graphviz_non_strict(
+            modelo=modelo,
+            clase=class_names[cidx],
+            tau=tau,
+            soporte=soporte_absoluto,
+            keep_mask=keep_mask,
+            feature_names=feat_names,
+            class_names_list=class_names,
+            color_clase=color_clase_hex
         )
-        st.caption(f"Modo NO estricto: nodos_keep={int(keep_mask.sum())}")
-
-        if keep_mask.any():
-            g = build_compacted_graphviz_non_strict(
-                modelo=modelo,
-                clase=class_names[cidx],
-                tau=tau,
-                soporte=soporte_absoluto,
-                keep_mask=keep_mask,
-                feature_names=feat_names,
-                class_names_list=class_names,
-                color_clase=color_clase_hex
-            )
-        else:
-            g = None
     else:
-        keep_mask = _keep_mask_strict_monotonic(
-            tree_,
-            cidx,
-            tau,
-            min_samples_to_keep=soporte_absoluto
+        g = None
+else:
+    keep_mask = _keep_mask_strict_monotonic(
+        tree_,
+        cidx,
+        tau,
+        min_samples_to_keep=soporte_absoluto
+    )
+    st.caption(f"Modo ESTRICTO: nodos_keep={int(keep_mask.sum())}")
+
+    if keep_mask.any():
+        g = build_compacted_graphviz_strict(
+            modelo=modelo,
+            clase=class_names[cidx],
+            tau=tau,
+            soporte=soporte_absoluto,
+            keep_mask=keep_mask,
+            feature_names=feat_names,
+            class_names_list=class_names,
+            color_clase=color_clase_hex
         )
-        st.caption(f"Modo ESTRICTO: nodos_keep={int(keep_mask.sum())}")
+    else:
+        g = None
 
-        if keep_mask.any():
-            g = build_compacted_graphviz_strict(
-                modelo=modelo,
-                clase=class_names[cidx],
-                tau=tau,
-                soporte=soporte_absoluto,
-                keep_mask=keep_mask,
-                feature_names=feat_names,
-                class_names_list=class_names,
-                color_clase=color_clase_hex
-            )
-        else:
-            g = None
 
-   
+    # =========================================================
+    # 📌 REGLA DESTACADA (Balance confianza–soporte)
+    # =========================================================
+    st.markdown("### 📌 Regla destacada (automática)")
+    
+    regla = None
+    if keep_mask is not None and keep_mask.any():
+        regla = regla_destacada_balance(
+            modelo=modelo,
+            keep_mask=keep_mask,
+            class_idx=cidx,
+            feature_names=feat_names,
+            class_label=class_names[cidx],
+            top_lines=8
+        )
+    
+    if regla is None:
+        st.caption("— No fue posible generar una regla destacada con los filtros actuales.")
+    else:
+        soporte_pct = (
+            regla["samples"] / float(tree_.n_node_samples[0]) * 100.0
+            if tree_.n_node_samples[0] > 0 else 0.0
+        )
+    
+        import textwrap
+        html = textwrap.dedent(f"""
+        <div style="background:#FFFFFF;
+                    border:1px solid #e6e6e6;
+                    border-radius:12px;
+                    padding:12px 14px;
+                    color:#111;
+                    line-height:1.35;
+                    margin-bottom:12px;">
+    
+          <div style="font-size:0.95rem; font-weight:700; margin-bottom:6px;">
+            Regla más fuerte (balance confianza–soporte)
+          </div>
+    
+          <div style="display:flex; gap:14px; flex-wrap:wrap;
+                      font-size:0.86rem; margin-bottom:10px;">
+            <div><b>Clase:</b> {regla["class_label"]}</div>
+            <div><b>Confianza p(clase):</b> {regla["p_c"]:.3f}</div>
+            <div><b>Soporte:</b> {regla["samples"]} ({soporte_pct:.2f}%)</div>
+            <div><b>Score:</b> {regla["score"]:.3f}</div>
+          </div>
+    
+          <div style="font-size:0.86rem; margin-bottom:6px;">
+            <b>Condiciones:</b>
+          </div>
+    
+          <ul style="margin:0 0 0 18px; padding:0; font-size:0.86rem;">
+            {''.join([f"<li>{c}</li>" for c in regla["conds_recortadas"]])}
+          </ul>
+    
+          {f"<div style='margin-top:6px; font-size:0.82rem; color:#555;'>… y {regla['n_conds_extra']} condiciones más.</div>" if regla["n_conds_extra"]>0 else ""}
+    
+        </div>
+        """)
+    
+        st.markdown(html, unsafe_allow_html=True)
+    
+    
+    # =========================================================
+    # Render del árbol
+    # =========================================================
     if g is not None:
         mostrar_dot_en_streamlit(g)
+
     
