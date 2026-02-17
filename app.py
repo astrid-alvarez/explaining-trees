@@ -1499,7 +1499,7 @@ with col2:
         # Variables más influyentes (Árbol Generalizado)
         # -----------------------------
        st.markdown("**Variables más influyentes (árbol generalizado):**")
-        try:
+       try:
             top_vars_global = top_variables_generalizado(
                 tree_=modelo.tree_,
                 feature_names=feat_names,
