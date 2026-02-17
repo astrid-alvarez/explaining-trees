@@ -1450,17 +1450,19 @@ with col2:
     
     # -----------------------------
     # TARJETA: ÁRBOL GENERALIZADO
+    # -----------------------------
     st.subheader("🌳ÁRBOL GENERALIZADO")
 
-    st.markdown(
-    f"""<div style="background-color:#FFFFFF;
-                padding:14px 16px;
-                border-radius:10px;
-                color:black;
-                font-size:0.92rem;
-                border: 1px solid #e0e0e0;
-                line-height:1.45;">
-    
+    html_card = f"""
+    <div style="
+        background-color:#FFFFFF;
+        padding:14px 16px;
+        border-radius:10px;
+        color:#111;
+        font-size:0.92rem;
+        border:1px solid #e0e0e0;
+        line-height:1.45;
+    ">
       <div style="margin-bottom:8px;">
         <b>Resumen del árbol:</b> profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}.
       </div>
@@ -1469,14 +1471,14 @@ with col2:
         Este árbol corresponde al modelo completo entrenado, sin aplicar filtros ni umbrales.
         Las explicaciones por clase se presentan mediante el Árbol Especialista.
       </div>
+    </div>
+    """
     
-    </div>""",
-    unsafe_allow_html=True
-    )
-
- 
+    components.html(html_card, height=115)  # ajusta height si lo ves cortado
+    
     if max_depth >= 12:
         st.info("Árbol profundo: puede ser difícil de leer ampliando, descarga el Árbol Generalizado (PNG).")
+    
 
 
     # -----------------------------
