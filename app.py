@@ -1656,73 +1656,74 @@ with col2:
         else:
             g = None
     
-    
-        # =========================================================
-        # 📌 REGLA DESTACADA (Balance confianza–soporte)
-        # =========================================================
-        st.markdown("### 📌 Regla destacada (automática)")
-        
-        regla = None
-        if keep_mask is not None and keep_mask.any():
-            regla = regla_destacada_balance(
-                modelo=modelo,
-                keep_mask=keep_mask,
-                class_idx=cidx,
-                feature_names=feat_names,
-                class_label=class_names[cidx],
-                top_lines=8
-            )
-        
-        if regla is None:
-            st.caption("— No fue posible generar una regla destacada con los filtros actuales.")
-        else:
-            soporte_pct = (
-                regla["samples"] / float(tree_.n_node_samples[0]) * 100.0
-                if tree_.n_node_samples[0] > 0 else 0.0
-            )
-        
-            import textwrap
-            html = textwrap.dedent(f"""
-            <div style="background:#FFFFFF;
-                        border:1px solid #e6e6e6;
-                        border-radius:12px;
-                        padding:12px 14px;
-                        color:#111;
-                        line-height:1.35;
-                        margin-bottom:12px;">
-        
-              <div style="font-size:0.95rem; font-weight:700; margin-bottom:6px;">
-                Regla más fuerte (balance confianza–soporte)
-              </div>
-        
-              <div style="display:flex; gap:14px; flex-wrap:wrap;
-                          font-size:0.86rem; margin-bottom:10px;">
-                <div><b>Clase:</b> {regla["class_label"]}</div>
-                <div><b>Confianza p(clase):</b> {regla["p_c"]:.3f}</div>
-                <div><b>Soporte:</b> {regla["samples"]} ({soporte_pct:.2f}%)</div>
-                <div><b>Score:</b> {regla["score"]:.3f}</div>
-              </div>
-        
-              <div style="font-size:0.86rem; margin-bottom:6px;">
-                <b>Condiciones:</b>
-              </div>
-        
-              <ul style="margin:0 0 0 18px; padding:0; font-size:0.86rem;">
-                {''.join([f"<li>{c}</li>" for c in regla["conds_recortadas"]])}
-              </ul>
-        
-              {f"<div style='margin-top:6px; font-size:0.82rem; color:#555;'>… y {regla['n_conds_extra']} condiciones más.</div>" if regla["n_conds_extra"]>0 else ""}
-        
-            </div>
-            """)
-        
-            st.markdown(html, unsafe_allow_html=True)
-        
-        
-        # =========================================================
-        # Render del árbol
-        # =========================================================
-        if g is not None:
-            mostrar_dot_en_streamlit(g)
+# =========================================================
+# 📌 REGLA DESTACADA (Balance confianza–soporte)
+# =========================================================
+st.markdown("### 📌 Regla destacada (automática)")
+
+regla = None
+if keep_mask is not None and keep_mask.any():
+    regla = regla_destacada_balance(
+        modelo=modelo,
+        keep_mask=keep_mask,
+        class_idx=cidx,
+        feature_names=feat_names,
+        class_label=class_names[cidx],
+        top_lines=8
+    )
+
+if regla is None:
+    st.caption("— No fue posible generar una regla destacada con los filtros actuales.")
+else:
+    soporte_pct = (
+        regla["samples"] / float(tree_.n_node_samples[0]) * 100.0
+        if tree_.n_node_samples[0] > 0 else 0.0
+    )
+
+    import textwrap
+    html = textwrap.dedent(f"""
+    <div style="background:#FFFFFF;
+                border:1px solid #e6e6e6;
+                border-radius:12px;
+                padding:12px 14px;
+                color:#111;
+                line-height:1.35;
+                margin-bottom:12px;">
+
+      <div style="font-size:0.95rem; font-weight:700; margin-bottom:6px;">
+        Regla más fuerte (balance confianza–soporte)
+      </div>
+
+      <div style="display:flex; gap:14px; flex-wrap:wrap;
+                  font-size:0.86rem; margin-bottom:10px;">
+        <div><b>Clase:</b> {regla["class_label"]}</div>
+        <div><b>Confianza p(clase):</b> {regla["p_c"]:.3f}</div>
+        <div><b>Soporte:</b> {regla["samples"]} ({soporte_pct:.2f}%)</div>
+        <div><b>Score:</b> {regla["score"]:.3f}</div>
+      </div>
+
+      <div style="font-size:0.86rem; margin-bottom:6px;">
+        <b>Condiciones:</b>
+      </div>
+
+      <ul style="margin:0 0 0 18px; padding:0; font-size:0.86rem;">
+        {''.join([f"<li>{c}</li>" for c in regla["conds_recortadas"]])}
+      </ul>
+
+      {f"<div style='margin-top:6px; font-size:0.82rem; color:#555;'>… y {regla['n_conds_extra']} condiciones más.</div>" if regla["n_conds_extra"]>0 else ""}
+
+    </div>
+    """)
+
+    st.markdown(html, unsafe_allow_html=True)
+
+
+# =========================================================
+# Render del árbol
+# =========================================================
+if g is not None:
+    mostrar_dot_en_streamlit(g)
+
+      
 
     
