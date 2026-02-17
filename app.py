@@ -1469,7 +1469,7 @@ with col2:
     
       <div style="font-size:0.85rem; color:#555;">
         Este árbol corresponde al modelo completo entrenado, sin aplicar filtros ni umbrales.
-        Las explicaciones por clase se presentan mediante el Árbol Especialista.
+        Las explicaciones por clase se presentan mediante el Árbol Especialista usando los filtros de simplificación.
       </div>
     </div>
     """
