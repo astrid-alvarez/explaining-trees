@@ -1476,9 +1476,7 @@ with col2:
     """,
        unsafe_allow_html=True
     )
-
-
-    
+ 
     if max_depth >= 12:
         st.info("Árbol profundo: puede ser difícil de leer ampliando, descarga el Árbol Generalizado (PNG).")
 
