@@ -236,7 +236,7 @@ INFO_EXTRA = {
 }
 
 
-st.title("Plataforma de Evaluación XAI: Árboles Especialistas")
+st.title("PLATAFORMA DE EVALUACIÓN XAI: ÁRBOLES ESPECIALISTAS")
 st.markdown(
     "<p style='font-size:0.95rem'><b>Objetivo:</b> "
     "Evaluar la explicabilidad de las explicaciones por clase.</p>",
@@ -1549,7 +1549,7 @@ with col2:
     # -----------------------------
     # Árbol especialista
     # -----------------------------
-    st.subheader("🌳 Árbol Especialista Generado")
+    st.subheader("🌳 ÁRBOL ESPECIALISTA")
 
     tree_ = modelo.tree_
     cidx = idx_objetivo
