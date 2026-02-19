@@ -1721,7 +1721,7 @@ with col2:
     # Render del árbol
     # =========================================================
     if g is not None:
-       
+ 
         # -----------------------------
         # TARJETA: RESUMEN ÁRBOL ESPECIALISTA
         # -----------------------------
@@ -1763,7 +1763,7 @@ with col2:
         </div>
         """,
             unsafe_allow_html=True
-        )
+        )  
 
         mostrar_dot_en_streamlit(g)
    
