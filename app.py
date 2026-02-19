@@ -1691,7 +1691,7 @@ with col2:
                     margin-bottom:12px;">
           
            <div style="font-size:0.95rem; font-weight:700; margin-bottom:6px;">
-              Regla más fuerte (balance confianza–soporte)
+              Regla Destacada
            </div>
           
           <div style="display:flex; gap:14px; flex-wrap:wrap;
