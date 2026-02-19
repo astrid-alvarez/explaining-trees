@@ -1689,11 +1689,11 @@ with col2:
                     color:#111;
                     line-height:1.35;
                     margin-bottom:12px;">
-          
+         """ 
            <div style="font-size:0.95rem; font-weight:700; margin-bottom:6px;">
           #    Regla más fuerte (balance confianza–soporte)
            </div>
-          
+          """
           <div style="display:flex; gap:14px; flex-wrap:wrap;
                       font-size:0.86rem; margin-bottom:10px;">
             <div><b>Clase:</b> {regla["class_label"]}</div>
