@@ -1559,8 +1559,6 @@ with col2:
     # -----------------------------
     st.subheader("🌳ÁRBOL GENERALIZADO")
 
-   import textwrap
-
     html_card = textwrap.dedent(f"""
     <div style="background-color:#FFFFFF;
         padding:14px 16px;
