@@ -17,7 +17,8 @@ import uuid
 import streamlit.components.v1 as components
 import streamlit as st
 from collections import Counter
-#import base64
+import textwrap
+
 
 
 # -----------------------------------------------------------------------------
@@ -1734,36 +1735,36 @@ with col2:
         else:
             reduccion_pct = 0.0
 
-        st.markdown(
-            f"""
+        html_resumen = textwrap.dedent(f"""
         <div style="background-color:#FFFFFF;
-                    padding:14px 16px;
-                    border-radius:10px;
-                    color:black;
-                    font-size:0.92rem;
-                    border: 1px solid #e0e0e0;
-                    line-height:1.45;
-                    margin-bottom:12px;">
-        
-            <div style="margin-bottom:8px;">
-                <b>Resumen del árbol especialista:</b><br>
-                nodos_keep = {nodos_keep} |
-                reducción estructural = {reduccion_pct:.1f}% |
-                confianza mínima = {tau:.2f} |
-                soporte mínimo = {soporte_absoluto} muestras
-            </div>
-        
-            <div style="font-size:0.85rem; color:#555;">
-                Este árbol es una simplificación controlada del modelo generalizado,
-                generada aplicando filtros de confianza y soporte para la clase
-                seleccionada. Su estructura depende de los parámetros definidos
-                en la sección <b>3. Filtros de Simplificación</b>.
-            </div>
-        
-        </div>
-        """,
-            unsafe_allow_html=True
-        )
+            padding:14px 16px;
+            border-radius:10px;
+            color:black;
+            font-size:0.92rem;
+            border:1px solid #e0e0e0;
+            line-height:1.45;
+            margin-bottom:12px;">
+
+      <div style="margin-bottom:8px;">
+        <b>Resumen del árbol especialista:</b><br>
+        nodos_keep = {nodos_keep} |
+        reducción estructural = {reduccion_pct:.1f}% |
+        confianza mínima = {tau:.2f} |
+        soporte mínimo = {soporte_absoluto} muestras
+      </div>
+
+      <div style="font-size:0.85rem; color:#555;">
+        Este árbol es una simplificación controlada del modelo generalizado,
+        generada aplicando filtros de confianza y soporte para la clase
+        seleccionada. Su estructura depende de los parámetros definidos
+        en la sección <b>3. Filtros de Simplificación</b>.
+      </div>
+
+    </div>
+    """).strip()
+    
+    st.markdown(html_resumen, unsafe_allow_html=True)
+
 
 
         mostrar_dot_en_streamlit(g)
