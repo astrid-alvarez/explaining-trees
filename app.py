@@ -1740,11 +1740,9 @@ with col2:
 
       <div style="margin-bottom:8px;">
         <b>Resumen del árbol especialista:</b><br>
-        nodos_keep = {nodos_keep} |
+        nodos = {nodos_keep} |
         reducción estructural = {reduccion_pct:.1f}% |
-        confianza mínima = {tau:.2f} |
-        soporte mínimo = {soporte_absoluto} muestras
-      </div>
+       </div>
 
       <div style="font-size:0.85rem; color:#555;">
         Este árbol es una simplificación controlada del modelo generalizado,
