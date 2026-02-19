@@ -1740,7 +1740,6 @@ with col2:
 
       <div style="margin-bottom:8px;">
         <b>Resumen del Árbol Especialista:</b> nodos = {nodos_keep} | reducción estructural = {reduccion_pct:.1f}% |
-        # <b>Resumen del Árbol Generalizado:</b> profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}.
        </div>
 
       <div style="font-size:0.85rem; color:#555;">
