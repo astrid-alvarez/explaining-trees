@@ -1767,7 +1767,7 @@ with col2:
 
 
 
-        mostrar_dot_en_streamlit(g)
+    mostrar_dot_en_streamlit(g)
    
 
       
