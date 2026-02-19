@@ -1690,9 +1690,9 @@ with col2:
                     line-height:1.35;
                     margin-bottom:12px;">
     
-          <div style="font-size:0.95rem; font-weight:700; margin-bottom:6px;">
+         # <div style="font-size:0.95rem; font-weight:700; margin-bottom:6px;">
             # Regla más fuerte (balance confianza–soporte)
-          </div>
+         # </div>
     
           <div style="display:flex; gap:14px; flex-wrap:wrap;
                       font-size:0.86rem; margin-bottom:10px;">
