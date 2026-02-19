@@ -1525,7 +1525,7 @@ with col2:
         line-height:1.45;
     ">
       <div style="margin-bottom:8px;">
-        <b>Resumen del árbol:</b> profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}.
+        <b>Resumen del Árbol Generalizado:</b> profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}.
       </div>
     
       <div style="font-size:0.85rem; color:#555;">
@@ -1691,14 +1691,14 @@ with col2:
                     margin-bottom:12px;">
     
           <div style="font-size:0.95rem; font-weight:700; margin-bottom:6px;">
-            Regla más fuerte (balance confianza–soporte)
+            #Regla más fuerte (balance confianza–soporte)
           </div>
     
           <div style="display:flex; gap:14px; flex-wrap:wrap;
                       font-size:0.86rem; margin-bottom:10px;">
             <div><b>Clase:</b> {regla["class_label"]}</div>
-            <div><b>Confianza p(clase):</b> {regla["p_c"]:.3f}</div>
-            <div><b>Soporte:</b> {regla["samples"]} ({soporte_pct:.2f}%)</div>
+           # <div><b>Confianza p(clase):</b> {regla["p_c"]:.3f}</div>
+           # <div><b>Soporte:</b> {regla["samples"]} ({soporte_pct:.2f}%)</div>
             <div><b>Score:</b> {regla["score"]:.3f}</div>
           </div>
     
