@@ -927,7 +927,52 @@ def top_variables_influyentes(tree_, keep_mask, feature_names, topk=5):
 
     return [name for name, _ in counts.most_common(topk)]
 
+def stats_subarbol_keep(tree_, keep_mask):
+    """
+    Estadísticas del subárbol inducido por keep_mask (sobre el árbol original sklearn):
+      - profundidad máxima dentro del subárbol keep
+      - #nodos keep
+      - #hojas dentro del subárbol keep (hojas del subárbol)
+    """
+    if keep_mask is None or not keep_mask.any():
+        return 0, 0, 0
 
+    n = tree_.node_count
+    depth = np.full(n, -1, dtype=int)
+
+    # DFS desde la raíz, solo siguiendo nodos keep
+    stack = [(0, 0)]
+    while stack:
+        u, d = stack.pop()
+        if not keep_mask[u]:
+            continue
+        depth[u] = max(depth[u], d)
+
+        if tree_.children_left[u] != -1:
+            L = int(tree_.children_left[u])
+            R = int(tree_.children_right[u])
+            if keep_mask[L]:
+                stack.append((L, d + 1))
+            if keep_mask[R]:
+                stack.append((R, d + 1))
+
+    max_depth_keep = int(depth[depth >= 0].max()) if np.any(depth >= 0) else 0
+    nodos_keep = int(keep_mask.sum())
+
+    # Hoja del subárbol = nodo keep sin hijos keep
+    hojas_keep = 0
+    for u in range(n):
+        if not keep_mask[u]:
+            continue
+        if tree_.children_left[u] == -1:
+            hojas_keep += 1
+        else:
+            L = int(tree_.children_left[u])
+            R = int(tree_.children_right[u])
+            if (not keep_mask[L]) and (not keep_mask[R]):
+                hojas_keep += 1
+
+    return max_depth_keep, nodos_keep, hojas_keep
 
 def _compact_path_to_intervals(path, feature_names):
     bounds = {}
