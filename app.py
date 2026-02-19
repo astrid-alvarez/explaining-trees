@@ -1559,16 +1559,18 @@ with col2:
     # -----------------------------
     st.subheader("🌳ÁRBOL GENERALIZADO")
 
-    html_card = f"""
-    <div style="
-        background-color:#FFFFFF;
+   import textwrap
+
+    html_card = textwrap.dedent(f"""
+    <div style="background-color:#FFFFFF;
         padding:14px 16px;
         border-radius:10px;
-        color:#111;
+        color:black;
         font-size:0.92rem;
         border:1px solid #e0e0e0;
         line-height:1.45;
-    ">
+        margin-bottom:12px;">
+    
       <div style="margin-bottom:8px;">
         <b>Resumen del Árbol Generalizado:</b> profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}.
       </div>
@@ -1577,10 +1579,12 @@ with col2:
         Este árbol corresponde al modelo completo entrenado, sin aplicar filtros ni umbrales.
         Las explicaciones por clase se presentan mediante el Árbol Especialista usando: 3. Filtros de Simplificación.
       </div>
-    </div>
-    """
     
-    components.html(html_card, height=115)  # ajusta height si lo ves cortado
+    </div>
+    """).strip()
+    
+    st.markdown(html_card, unsafe_allow_html=True)
+    
     
     if max_depth >= 12:
         st.info("Árbol profundo: puede ser difícil de leer ampliando, descarga el Árbol Generalizado (PNG).")
