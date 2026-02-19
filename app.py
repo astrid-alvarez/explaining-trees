@@ -1766,8 +1766,9 @@ with col2:
         # -----------------------------
 
         total_nodos_general = n_nodes  # viene del resumen del generalizado
-        nodos_keep = int(keep_mask.sum())
-
+        prof_keep, nodos_keep, hojas_keep = stats_subarbol_keep(tree_, keep_mask)
+        
+  
         if total_nodos_general > 0:
             reduccion_pct = 100 * (1 - nodos_keep / total_nodos_general)
         else:
@@ -1784,7 +1785,7 @@ with col2:
             margin-bottom:12px;">
 
       <div style="margin-bottom:8px;">
-        <b>Resumen del Árbol Especialista:</b> nodos = {nodos_keep} | reducción estructural = {reduccion_pct:.1f}% |
+         <b>Resumen del Árbol Especialista:</b> profundidad máx = {prof_keep} | nodos = {nodos_keep} | hojas = {hojas_keep} | reducción estructural = {reduccion_pct:.1f}% |
        </div>
 
       <div style="font-size:0.85rem; color:#555;">
