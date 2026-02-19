@@ -1694,14 +1694,7 @@ with col2:
               Regla Destacada
            </div>
           
-          <div style="display:flex; gap:14px; flex-wrap:wrap;
-                      font-size:0.86rem; margin-bottom:10px;">
-             <div><b>Clase:</b> {regla["class_label"]}</div>
-             <div><b>Confianza p(clase):</b> {regla["p_c"]:.3f}</div>
-             <div><b>Soporte:</b> {regla["samples"]} ({soporte_pct:.2f}%)</div>
-             <div><b>Score:</b> {regla["score"]:.3f}</div>
-          </div>
-    
+           
           <div style="font-size:0.86rem; margin-bottom:6px;">
             <b>Condiciones:</b>
           </div>
