@@ -1659,7 +1659,7 @@ with col2:
     # =========================================================
     # REGLA DESTACADA (Balance confianza–soporte)
     # =========================================================
-    st.markdown("###Regla destacada")
+    st.markdown("Regla destacada")
     
     regla = None
     if keep_mask is not None and keep_mask.any():
