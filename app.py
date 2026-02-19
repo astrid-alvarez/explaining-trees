@@ -1433,7 +1433,7 @@ with col1:
     if soporte_absoluto < 1:
         soporte_absoluto = 1
 
-    st.caption(f"Soporte absoluto: {soporte_absoluto} muestras.")
+    # st.caption(f"Soporte absoluto: {soporte_absoluto} muestras.")
 
     tau = confianza_pct / 100.0
 
