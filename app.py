@@ -1762,7 +1762,8 @@ with col2:
     """).strip()
     
     st.markdown(html_resumen, unsafe_allow_html=True)
-       # =========================================================
+    
+    # =========================================================
     # LISTA DE REGLAS (Balance confianza–soporte / confianza→soporte)
     # =========================================================
     st.markdown("### Reglas (ordenadas)")
@@ -1823,16 +1824,16 @@ with col2:
             st.markdown(html, unsafe_allow_html=True)
     
     
-    # =========================================================
-    # Render del árbol
-    # =========================================================
+        # =========================================================
+        # Render del árbol
+        # =========================================================
         if g is not None:
- 
      
-
-
-
-    mostrar_dot_en_streamlit(g)
+         
+    
+    
+    
+        mostrar_dot_en_streamlit(g)
    
 
       
