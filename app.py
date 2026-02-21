@@ -1313,25 +1313,40 @@ def top_variables_generalizado(tree_, feature_names, topk=5):
 import math
 import textwrap
 
-def regla_destacada_balance(modelo, keep_mask, class_idx, feature_names, class_label, top_lines=8):
+def listar_reglas_balance(
+    modelo,
+    keep_mask,
+    class_idx,
+    feature_names,
+    class_label,
+    topk=10,
+    top_lines=8,
+    ordenar="score"  # "score" o "confianza_soporte"
+):
     """
-    Selecciona la 'regla más fuerte' usando balance confianza–soporte:
-        score = p(clase) * log(1 + samples)
+    Lista reglas (hojas) del ÁRBOL ESPECIALISTA (keep_mask) y las ordena con un criterio.
 
-    Usa SOLO hojas que estén dentro de keep_mask (o sea, del árbol especialista actual).
-    Devuelve None si no hay reglas.
+    Reglas consideradas:
+      - hojas dentro de keep_mask (vía _get_paths_for_class)
+      - p(clase) calculada en la hoja
+      - soporte = samples en la hoja
+
+    Criterios:
+      - ordenar="score": score = p(clase) * log(1 + samples)
+      - ordenar="confianza_soporte": ordena por p(clase) desc, luego samples desc
+
+    Devuelve lista de dicts (vacía si no hay reglas).
     """
     tree_ = modelo.tree_
 
-    # 1) Paths por hoja (solo hojas keep)
     paths = _get_paths_for_class(tree_, keep_mask)
     if not paths:
-        return None
+        return []
 
-    best = None
+    reglas = []
 
     for leaf_id, path in paths.items():
-        # leaf_id debe ser hoja; por seguridad:
+        # seguridad: leaf_id debe ser hoja
         if tree_.children_left[leaf_id] != -1:
             continue
 
@@ -1342,34 +1357,40 @@ def regla_destacada_balance(modelo, keep_mask, class_idx, feature_names, class_l
         p_c = float(probs[class_idx])
         score = p_c * math.log1p(samples)
 
-        # compactar condiciones del path
+        # condiciones compactadas
         conds = _compact_path_to_intervals(path, feature_names)
         cond_texts = [c["text"] for c in conds]
 
-        # guardar mejor
-        if (best is None) or (score > best["score"]):
-            best = {
-                "leaf_id": int(leaf_id),
-                "p_c": p_c,
-                "samples": int(samples),
-                "score": float(score),
-                "conds": cond_texts,
-                "class_label": str(class_label)
-            }
+        # recorte visual
+        if len(cond_texts) > top_lines:
+            conds_rec = cond_texts[:top_lines]
+            n_extra = len(cond_texts) - top_lines
+        else:
+            conds_rec = cond_texts
+            n_extra = 0
 
-    if best is None:
-        return None
+        reglas.append({
+            "leaf_id": int(leaf_id),
+            "p_c": p_c,
+            "samples": int(samples),
+            "score": float(score),
+            "conds": cond_texts,
+            "conds_recortadas": conds_rec,
+            "n_conds_extra": int(n_extra),
+            "class_label": str(class_label),
+        })
 
-    # limitar para no hacer la tarjeta eterna
-    if len(best["conds"]) > top_lines:
-        best["conds_recortadas"] = best["conds"][:top_lines]
-        best["n_conds_extra"] = len(best["conds"]) - top_lines
+    if not reglas:
+        return []
+
+    # ordenar
+    if ordenar == "confianza_soporte":
+        reglas.sort(key=lambda r: (r["p_c"], r["samples"]), reverse=True)
     else:
-        best["conds_recortadas"] = best["conds"]
-        best["n_conds_extra"] = 0
+        # default: score
+        reglas.sort(key=lambda r: r["score"], reverse=True)
 
-    return best
-
+    return reglas[:topk]
 
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA IZQUIERDA (CONTROL Y FILTRADO)
