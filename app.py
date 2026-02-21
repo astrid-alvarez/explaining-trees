@@ -1824,16 +1824,16 @@ with col2:
             st.markdown(html, unsafe_allow_html=True)
     
     
-        # =========================================================
-        # Render del árbol
-        # =========================================================
-        if g is not None:
-     
+            # =========================================================
+            # Render del árbol
+            # =========================================================
+            if g is not None:
          
-    
-    
-    
-        mostrar_dot_en_streamlit(g)
+             
+        
+        
+        
+            mostrar_dot_en_streamlit(g)
    
 
       
