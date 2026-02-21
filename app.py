@@ -1724,19 +1724,22 @@ with col2:
             )
         else:
             g = None
-           # -----------------------------
+    # =========================================================
+    # Render del árbol + resumen + reglas
+    # =========================================================
+    if g is not None:
+    
+        # -----------------------------
         # TARJETA: RESUMEN ÁRBOL ESPECIALISTA
         # -----------------------------
-
         total_nodos_general = n_nodes  # viene del resumen del generalizado
         prof_keep, nodos_keep, hojas_keep = stats_subarbol_keep(tree_, keep_mask)
-        
-  
+    
         if total_nodos_general > 0:
             reduccion_pct = 100 * (1 - nodos_keep / total_nodos_general)
         else:
             reduccion_pct = 0.0
-
+    
         html_resumen = textwrap.dedent(f"""
         <div style="background-color:#FFFFFF;
             padding:14px 16px;
@@ -1746,94 +1749,91 @@ with col2:
             border:1px solid #e0e0e0;
             line-height:1.45;
             margin-bottom:12px;">
-
-      <div style="margin-bottom:8px;">
-         <b>Resumen del Árbol Especialista:</b> profundidad máx = {prof_keep} | nodos = {nodos_keep} | hojas = {hojas_keep} | reducción estructural = {reduccion_pct:.1f}% |
-       </div>
-
-      <div style="font-size:0.85rem; color:#555;">
-        Este árbol es una simplificación controlada del modelo generalizado,
-        generada aplicando filtros de confianza y soporte para la clase
-        seleccionada. Su estructura depende de los parámetros definidos
-        en la sección <b>3. Filtros de Simplificación</b>.
-      </div>
-
-    </div>
-    """).strip()
     
-    st.markdown(html_resumen, unsafe_allow_html=True)
+          <div style="margin-bottom:8px;">
+            <b>Resumen del Árbol Especialista:</b>
+            profundidad máx = {prof_keep} | nodos = {nodos_keep} | hojas = {hojas_keep} |
+            reducción estructural = {reduccion_pct:.1f}%.
+          </div>
     
-    # =========================================================
-    # LISTA DE REGLAS (Balance confianza–soporte / confianza→soporte)
-    # =========================================================
-    st.markdown("### Reglas (ordenadas)")
+          <div style="font-size:0.85rem; color:#555;">
+            Este árbol es una simplificación controlada del modelo generalizado,
+            generada aplicando filtros de confianza y soporte para la clase
+            seleccionada. Su estructura depende de los parámetros definidos
+            en la sección <b>3. Filtros de Simplificación</b>.
+          </div>
     
-    reglas = []
-    if keep_mask is not None and keep_mask.any():
-        reglas = listar_reglas_balance(
-            modelo=modelo,
-            keep_mask=keep_mask,
-            class_idx=cidx,
-            feature_names=feat_names,
-            class_label=class_names[cidx],
-            topk=10,             # <-- cambia cuántas reglas quieres mostrar
-            top_lines=8,         # <-- cuántas condiciones muestras por regla
-            ordenar="confianza_soporte"   # <-- "confianza_soporte" recomendado por tu codirector
-            # ordenar="score"             # <-- alternativa balanceada
-        )
+        </div>
+        """).strip()
     
-    if not reglas:
-        st.caption("— No fue posible generar reglas con los filtros actuales.")
+        st.markdown(html_resumen, unsafe_allow_html=True)
+    
+        # =========================================================
+        # LISTA DE REGLAS (Balance confianza–soporte / confianza→soporte)
+        # =========================================================
+        st.markdown("### Reglas (ordenadas)")
+    
+        reglas = []
+        if keep_mask is not None and keep_mask.any():
+            reglas = listar_reglas_balance(
+                modelo=modelo,
+                keep_mask=keep_mask,
+                class_idx=cidx,
+                feature_names=feat_names,
+                class_label=class_names[cidx],
+                topk=10,
+                top_lines=8,
+                ordenar="confianza_soporte"
+            )
+    
+        if not reglas:
+            st.caption("— No fue posible generar reglas con los filtros actuales.")
+        else:
+            total_base = float(tree_.n_node_samples[0]) if tree_.n_node_samples[0] > 0 else 1.0
+    
+            for i, r in enumerate(reglas, start=1):
+                soporte_pct = (r["samples"] / total_base) * 100.0
+    
+                html = textwrap.dedent(f"""
+                <div style="background:#FFFFFF;
+                            border:1px solid #e6e6e6;
+                            border-radius:12px;
+                            padding:12px 14px;
+                            color:#111;
+                            line-height:1.35;
+                            margin-bottom:10px;">
+    
+                  <div style="font-size:0.92rem; font-weight:700; margin-bottom:6px;">
+                    Regla #{i}
+                  </div>
+    
+                  <div style="font-size:0.86rem; margin-bottom:8px; color:#333;">
+                    <b>Confianza:</b> {r["p_c"]:.3f} &nbsp; | &nbsp;
+                    <b>Soporte:</b> {r["samples"]} ({soporte_pct:.2f}%)
+                  </div>
+    
+                  <div style="font-size:0.86rem; margin-bottom:6px;">
+                    <b>Condiciones:</b>
+                  </div>
+    
+                  <ul style="margin:0 0 0 18px; padding:0; font-size:0.86rem;">
+                    {''.join([f"<li>{c}</li>" for c in r["conds_recortadas"]])}
+                  </ul>
+    
+                  {f"<div style='margin-top:6px; font-size:0.82rem; color:#555;'>… y {r['n_conds_extra']} condiciones más.</div>" if r["n_conds_extra"]>0 else ""}
+    
+                </div>
+                """).strip()
+    
+                st.markdown(html, unsafe_allow_html=True)
+    
+        # =========================================================
+        # Mostrar el árbol (AL FINAL, fuera del for)
+        # =========================================================
+        mostrar_dot_en_streamlit(g)
+    
     else:
-        total_base = float(tree_.n_node_samples[0]) if tree_.n_node_samples[0] > 0 else 1.0
-    
-        for i, r in enumerate(reglas, start=1):
-            soporte_pct = (r["samples"] / total_base) * 100.0
-    
-            html = textwrap.dedent(f"""
-            <div style="background:#FFFFFF;
-                        border:1px solid #e6e6e6;
-                        border-radius:12px;
-                        padding:12px 14px;
-                        color:#111;
-                        line-height:1.35;
-                        margin-bottom:10px;">
-    
-              <div style="font-size:0.92rem; font-weight:700; margin-bottom:6px;">
-                Regla #{i}
-              </div>
-    
-              <div style="font-size:0.86rem; margin-bottom:8px; color:#333;">
-                <b>Confianza:</b> {r["p_c"]:.3f} &nbsp; | &nbsp;
-                <b>Soporte:</b> {r["samples"]} ({soporte_pct:.2f}%)
-              </div>
-    
-              <div style="font-size:0.86rem; margin-bottom:6px;">
-                <b>Condiciones:</b>
-              </div>
-    
-              <ul style="margin:0 0 0 18px; padding:0; font-size:0.86rem;">
-                {''.join([f"<li>{c}</li>" for c in r["conds_recortadas"]])}
-              </ul>
-    
-              {f"<div style='margin-top:6px; font-size:0.82rem; color:#555;'>… y {r['n_conds_extra']} condiciones más.</div>" if r["n_conds_extra"]>0 else ""}
-    
-            </div>
-            """).strip()
-    
-            st.markdown(html, unsafe_allow_html=True)
-    
-    
-            # =========================================================
-            # Render del árbol
-            # =========================================================
-            if g is not None:
-         
-             
-        
-        
-        
-            mostrar_dot_en_streamlit(g)
+        st.caption("— No se generó árbol especialista con los filtros actuales.")
    
 
       
