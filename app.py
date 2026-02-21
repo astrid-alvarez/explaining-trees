@@ -1769,66 +1769,67 @@ with col2:
         st.markdown(html_resumen, unsafe_allow_html=True)
     
         # =========================================================
-        # LISTA DE REGLAS (Balance confianza–soporte / confianza→soporte)
+        # LISTA DE REGLAS (dentro de expander)
         # =========================================================
-        st.markdown("### Reglas (ordenadas)")
-    
-        reglas = []
-        if keep_mask is not None and keep_mask.any():
-            reglas = listar_reglas_balance(
-                modelo=modelo,
-                keep_mask=keep_mask,
-                class_idx=cidx,
-                feature_names=feat_names,
-                class_label=class_names[cidx],
-                topk=10,
-                top_lines=8,
-                ordenar="confianza_soporte"
-            )
-    
-        if not reglas:
-            st.caption("— No fue posible generar reglas con los filtros actuales.")
-        else:
-            total_base = float(tree_.n_node_samples[0]) if tree_.n_node_samples[0] > 0 else 1.0
-    
-            for i, r in enumerate(reglas, start=1):
-                soporte_pct = (r["samples"] / total_base) * 100.0
-    
-                html = textwrap.dedent(f"""
-                <div style="background:#FFFFFF;
-                            border:1px solid #e6e6e6;
-                            border-radius:12px;
-                            padding:12px 14px;
-                            color:#111;
-                            line-height:1.35;
-                            margin-bottom:10px;">
-    
-                  <div style="font-size:0.92rem; font-weight:700; margin-bottom:6px;">
-                    Regla #{i}
-                  </div>
-    
-                  <div style="font-size:0.86rem; margin-bottom:8px; color:#333;">
-                    <b>Confianza:</b> {r["p_c"]:.3f} &nbsp; | &nbsp;
-                    <b>Soporte:</b> {r["samples"]} ({soporte_pct:.2f}%)
-                  </div>
-    
-                  <div style="font-size:0.86rem; margin-bottom:6px;">
-                    <b>Condiciones:</b>
-                  </div>
-    
-                  <ul style="margin:0 0 0 18px; padding:0; font-size:0.86rem;">
-                    {''.join([f"<li>{c}</li>" for c in r["conds_recortadas"]])}
-                  </ul>
-    
-                  {f"<div style='margin-top:6px; font-size:0.82rem; color:#555;'>… y {r['n_conds_extra']} condiciones más.</div>" if r["n_conds_extra"]>0 else ""}
-    
-                </div>
-                """).strip()
-    
-                st.markdown(html, unsafe_allow_html=True)
+        with st.expander("Reglas (ordenadas)", expanded=False):
+        
+            reglas = []
+        
+            if keep_mask is not None and keep_mask.any():
+                reglas = listar_reglas_balance(
+                    modelo=modelo,
+                    keep_mask=keep_mask,
+                    class_idx=cidx,
+                    feature_names=feat_names,
+                    class_label=class_names[cidx],
+                    topk=10,
+                    top_lines=8,
+                    ordenar="confianza_soporte"
+                )
+        
+            if not reglas:
+                st.caption("— No fue posible generar reglas con los filtros actuales.")
+            else:
+                total_base = float(tree_.n_node_samples[0]) if tree_.n_node_samples[0] > 0 else 1.0
+        
+                for i, r in enumerate(reglas, start=1):
+                    soporte_pct = (r["samples"] / total_base) * 100.0
+        
+                    html = textwrap.dedent(f"""
+                    <div style="background:#FFFFFF;
+                                border:1px solid #e6e6e6;
+                                border-radius:12px;
+                                padding:12px 14px;
+                                color:#111;
+                                line-height:1.35;
+                                margin-bottom:10px;">
+        
+                      <div style="font-size:0.92rem; font-weight:700; margin-bottom:6px;">
+                        Regla #{i}
+                      </div>
+        
+                      <div style="font-size:0.86rem; margin-bottom:8px; color:#333;">
+                        <b>Confianza:</b> {r["p_c"]:.3f} &nbsp; | &nbsp;
+                        <b>Soporte:</b> {r["samples"]} ({soporte_pct:.2f}%)
+                      </div>
+        
+                      <div style="font-size:0.86rem; margin-bottom:6px;">
+                        <b>Condiciones:</b>
+                      </div>
+        
+                      <ul style="margin:0 0 0 18px; padding:0; font-size:0.86rem;">
+                        {''.join([f"<li>{c}</li>" for c in r["conds_recortadas"]])}
+                      </ul>
+        
+                      {f"<div style='margin-top:6px; font-size:0.82rem; color:#555;'>… y {r['n_conds_extra']} condiciones más.</div>" if r["n_conds_extra"]>0 else ""}
+        
+                    </div>
+                    """).strip()
+        
+                    st.markdown(html, unsafe_allow_html=True)
     
         # =========================================================
-        # Mostrar el árbol (AL FINAL, fuera del for)
+        # Mostrar el árbol 
         # =========================================================
         mostrar_dot_en_streamlit(g)
     
