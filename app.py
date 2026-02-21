@@ -1724,7 +1724,44 @@ with col2:
             )
         else:
             g = None
+           # -----------------------------
+        # TARJETA: RESUMEN ÁRBOL ESPECIALISTA
+        # -----------------------------
+
+        total_nodos_general = n_nodes  # viene del resumen del generalizado
+        prof_keep, nodos_keep, hojas_keep = stats_subarbol_keep(tree_, keep_mask)
         
+  
+        if total_nodos_general > 0:
+            reduccion_pct = 100 * (1 - nodos_keep / total_nodos_general)
+        else:
+            reduccion_pct = 0.0
+
+        html_resumen = textwrap.dedent(f"""
+        <div style="background-color:#FFFFFF;
+            padding:14px 16px;
+            border-radius:10px;
+            color:black;
+            font-size:0.92rem;
+            border:1px solid #e0e0e0;
+            line-height:1.45;
+            margin-bottom:12px;">
+
+      <div style="margin-bottom:8px;">
+         <b>Resumen del Árbol Especialista:</b> profundidad máx = {prof_keep} | nodos = {nodos_keep} | hojas = {hojas_keep} | reducción estructural = {reduccion_pct:.1f}% |
+       </div>
+
+      <div style="font-size:0.85rem; color:#555;">
+        Este árbol es una simplificación controlada del modelo generalizado,
+        generada aplicando filtros de confianza y soporte para la clase
+        seleccionada. Su estructura depende de los parámetros definidos
+        en la sección <b>3. Filtros de Simplificación</b>.
+      </div>
+
+    </div>
+    """).strip()
+    
+    st.markdown(html_resumen, unsafe_allow_html=True)
        # =========================================================
     # LISTA DE REGLAS (Balance confianza–soporte / confianza→soporte)
     # =========================================================
@@ -1791,44 +1828,7 @@ with col2:
     # =========================================================
     if g is not None:
  
-        # -----------------------------
-        # TARJETA: RESUMEN ÁRBOL ESPECIALISTA
-        # -----------------------------
-
-        total_nodos_general = n_nodes  # viene del resumen del generalizado
-        prof_keep, nodos_keep, hojas_keep = stats_subarbol_keep(tree_, keep_mask)
-        
-  
-        if total_nodos_general > 0:
-            reduccion_pct = 100 * (1 - nodos_keep / total_nodos_general)
-        else:
-            reduccion_pct = 0.0
-
-        html_resumen = textwrap.dedent(f"""
-        <div style="background-color:#FFFFFF;
-            padding:14px 16px;
-            border-radius:10px;
-            color:black;
-            font-size:0.92rem;
-            border:1px solid #e0e0e0;
-            line-height:1.45;
-            margin-bottom:12px;">
-
-      <div style="margin-bottom:8px;">
-         <b>Resumen del Árbol Especialista:</b> profundidad máx = {prof_keep} | nodos = {nodos_keep} | hojas = {hojas_keep} | reducción estructural = {reduccion_pct:.1f}% |
-       </div>
-
-      <div style="font-size:0.85rem; color:#555;">
-        Este árbol es una simplificación controlada del modelo generalizado,
-        generada aplicando filtros de confianza y soporte para la clase
-        seleccionada. Su estructura depende de los parámetros definidos
-        en la sección <b>3. Filtros de Simplificación</b>.
-      </div>
-
-    </div>
-    """).strip()
-    
-    st.markdown(html_resumen, unsafe_allow_html=True)
+     
 
 
 
