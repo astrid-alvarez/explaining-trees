@@ -1557,98 +1557,94 @@ with col2:
     max_depth, n_nodes, n_leaves = resumen_arbol(modelo)
     
     # -----------------------------
-    # TARJETA: ÁRBOL GENERALIZADO
-    # -----------------------------
-    st.subheader("🌳ÁRBOL GENERALIZADO")
+# TARJETA: ÁRBOL GENERALIZADO
+# -----------------------------
+st.subheader("🌳ÁRBOL GENERALIZADO")
 
-    html_card = textwrap.dedent(f"""
-    <div style="background-color:#FFFFFF;
-        padding:14px 16px;
-        border-radius:10px;
-        color:black;
-        font-size:0.92rem;
-        border:1px solid #e0e0e0;
-        line-height:1.45;
-        margin-bottom:12px;">
-    
-      <div style="margin-bottom:8px;">
-        <b>Resumen del Árbol Generalizado:</b> profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}.
-      </div>
-    
-      <div style="font-size:0.85rem; color:#555;">
+# 1) Frase explicativa FUERA de la caja (misma estructura que Árbol Especialista)
+st.markdown(
+    """
+    <div style="font-size:0.90rem; 
+                color:#cfcfcf; 
+                margin-bottom:12px; 
+                line-height:1.4;">
         Este árbol corresponde al modelo completo entrenado, sin aplicar filtros ni umbrales.
-        Las explicaciones por clase se presentan mediante el Árbol Especialista usando: 3. Filtros de Simplificación.
-      </div>
-    
+        Las explicaciones por clase se presentan mediante el Árbol Especialista usando:
+        <b>3. Filtros de Simplificación</b>.
     </div>
-    """).strip()
-    
-    st.markdown(html_card, unsafe_allow_html=True)
-    
-    
-    if max_depth >= 12:
-        st.info("Árbol profundo: puede ser difícil de leer ampliando, descarga el Árbol Generalizado (PNG).")
-    
+    """,
+    unsafe_allow_html=True
+)
 
+# 2) Variables más influyentes del generalizado (para ponerlas dentro de la caja)
+top_vars_global = []
+try:
+    top_vars_global = top_variables_generalizado(
+        tree_=modelo.tree_,
+        feature_names=feat_names,
+        topk=5
+    )
+except Exception:
+    top_vars_global = []
 
-    # -----------------------------
-    # Árbol generalizado (comparación) + descarga PNG
-    # -----------------------------
-    with st.expander("🆚 Comparar con Árbol Generalizado (Clic para desplegar)", expanded=False):
+vars_global_txt = " | ".join(top_vars_global) if top_vars_global else "—"
 
-        st.markdown(f"### {nombre_bd}")
-    
- 
-       
-    
-        prefijo_bd = nombre_bd.split('_')[0]
-        nombre_imagen_global = f"ARBOL_GENERALIZADO_{prefijo_bd}.png"
-    
-        if os.path.exists(nombre_imagen_global):
-    
-            st.image(
-                nombre_imagen_global,
-                caption=f"Modelo Generalizado - {prefijo_bd}",
-                use_container_width=True
-            )
-    
-            with open(nombre_imagen_global, "rb") as f:
-                st.download_button(
-                    "⬇️ Descargar Árbol Generalizado (PNG)",
-                    data=f.read(),
-                    file_name=nombre_imagen_global,
-                    mime="image/png"
-                )
-    
-        else:
-            st.warning(
-                f"No se encontró la imagen '{nombre_imagen_global}'. "
-                f"Asegúrate de tenerla en la carpeta."
-            )
+# 3) Caja blanca SOLO con Resumen + Variables (como en Árbol Especialista)
+html_card = textwrap.dedent(f"""
+<div style="background-color:#FFFFFF;
+    padding:14px 16px;
+    border-radius:10px;
+    color:black;
+    font-size:0.92rem;
+    border:1px solid #e0e0e0;
+    line-height:1.45;
+    margin-bottom:12px;">
 
-         # -----------------------------
-        # Variables más influyentes (Árbol Generalizado)
-        # -----------------------------
-        st.markdown("**Variables más influyentes (Árbol Generalizado):**")
-    
-        try:
-            top_vars_global = top_variables_generalizado(
-                tree_=modelo.tree_,
-                feature_names=feat_names,
-                topk=5
+  <div style="margin-bottom:8px;">
+    <b>Resumen del Árbol Generalizado:</b> profundidad máx = {max_depth} | nodos = {n_nodes} | hojas = {n_leaves}.
+  </div>
+
+  <div style="margin-bottom:0px;">
+    <b>Variables más influyentes:</b> {vars_global_txt}
+  </div>
+
+</div>
+""").strip()
+
+st.markdown(html_card, unsafe_allow_html=True)
+
+if max_depth >= 12:
+    st.info("Árbol profundo: puede ser difícil de leer ampliando, descarga el Árbol Generalizado (PNG).")
+
+# -----------------------------
+# Árbol generalizado (comparación) + descarga PNG
+# -----------------------------
+with st.expander("🆚 Comparar con Árbol Generalizado (Clic para desplegar)", expanded=False):
+
+    st.markdown(f"### {nombre_bd}")
+
+    prefijo_bd = nombre_bd.split('_')[0]
+    nombre_imagen_global = f"ARBOL_GENERALIZADO_{prefijo_bd}.png"
+
+    if os.path.exists(nombre_imagen_global):
+        st.image(
+            nombre_imagen_global,
+            caption=f"Modelo Generalizado - {prefijo_bd}",
+            use_container_width=True
+        )
+
+        with open(nombre_imagen_global, "rb") as f:
+            st.download_button(
+                "⬇️ Descargar Árbol Generalizado (PNG)",
+                data=f.read(),
+                file_name=nombre_imagen_global,
+                mime="image/png"
             )
-    
-            if len(top_vars_global) == 0:
-                st.caption("—")
-            else:
-                for v in top_vars_global:
-                    st.markdown(f"- {v}")
-    
-        except Exception as e:
-            st.caption("—")
-            st.warning(
-                f"No fue posible calcular variables influyentes del árbol generalizado: {e}"
-            )
+    else:
+        st.warning(
+            f"No se encontró la imagen '{nombre_imagen_global}'. "
+            f"Asegúrate de tenerla en la carpeta."
+        )
 
     # -----------------------------
     # Árbol especialista
