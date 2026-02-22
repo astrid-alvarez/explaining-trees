@@ -1819,7 +1819,7 @@ with col2:
                       </div>
                 
                       <div style="font-size:0.86rem; margin-bottom:8px; color:#333;">
-                        <b>Confianza:</b> {r["p_c"]:.3f} &nbsp; | &nbsp;
+                        <b>Confianza:</b> {r["p_c"]*100:.1f}% &nbsp; | &nbsp;
                         <b>Soporte:</b> {r["samples"]} ({soporte_pct:.2f}%)
                       </div>
                                 
