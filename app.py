@@ -64,7 +64,7 @@ def mostrar_dot_en_streamlit(dot, vh=85, height_px=900):
                 svg.setAttribute("viewBox", `${{bbox.x}} ${{bbox.y}} ${{bbox.width}} ${{bbox.height}}`);
         
                 const wrapWidth = wrap.clientWidth || 1000;
-                const maxH = Math.floor(window.innerHeight * 0.85);
+                const maxH = Math.floor(window.innerHeight * 0.95);
                 const h = Math.max(420, Math.min(maxH, (bbox.height / bbox.width) * wrapWidth));
                 wrap.style.height = h + "px";
               }}
@@ -84,7 +84,7 @@ def mostrar_dot_en_streamlit(dot, vh=85, height_px=900):
         }})();
         </script>
         """
-        components.html(html, height=600, scrolling=True)
+        components.html(html, height=1000, scrolling=True)
 
 
     except Exception as e:
@@ -424,7 +424,7 @@ if extra is not None:
         ax.set_xticks(range(len(etiquetas)))
         ax.set_xticklabels(etiquetas, rotation=45, ha='right', fontsize=10)
 
-        ax.set_ylabel("Porcentaje de registros (%)", fontsize=9)
+        ax.set_ylabel("Porcentaje de registros (%)", fontsize=8)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
 
