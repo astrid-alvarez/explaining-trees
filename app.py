@@ -1322,8 +1322,8 @@ def listar_reglas_balance(
     class_idx,
     feature_names,
     class_label,
-    topk=10,
-    top_lines=8,
+    topk=30,
+    top_lines=10**9,
     ordenar="score"  # "score" o "confianza_soporte"
 ):
     """
