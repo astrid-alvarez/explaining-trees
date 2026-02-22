@@ -739,7 +739,7 @@ if sup_max_pct > 0 and sup_max_pct < umbral_pct_bajo:
 
 # --- Expander de interpretación (mismo tamaño de letra y espaciado consistente) ---
 st.sidebar.markdown("")  # espacio pequeño
-with st.sidebar.expander("¿Cómo interpretar este diagnóstico?", expanded=False):
+with st.sidebar.expander("Interpretación de Diagnóstico", expanded=False):
     st.markdown(
         """
         <div style="font-size:0.80rem; line-height:1.25;">
