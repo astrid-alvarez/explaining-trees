@@ -1814,10 +1814,10 @@ with col2:
                                 line-height:1.35;
                                 margin-bottom:10px;">
                 
-                      <div style="font-size:0.92rem; font-weight:700; margin-bottom:8px;">
-                         Regla #{i} &nbsp; | &nbsp;
-                         Confianza: {r["p_c"]*100:.2f}% &nbsp; | &nbsp;
-                         Soporte: {r["samples"]} ({soporte_pct:.2f}%)
+                      <div style="font-size:0.92rem; margin-bottom:8px;">
+                          <b>Regla #{i}</b> &nbsp; | &nbsp;
+                          Confianza: {r["p_c"]*100:.1f}% &nbsp; | &nbsp;
+                          Soporte: {r["samples"]} ({soporte_pct:.1f}%)
                        </div>
                                 
                       <div style="font-size:0.86rem; color:#111; line-height:1.35;">
