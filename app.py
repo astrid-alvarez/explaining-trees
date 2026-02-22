@@ -1654,6 +1654,14 @@ with col2:
     # Árbol especialista
     # -----------------------------
     st.subheader("🌳 ÁRBOL ESPECIALISTA")
+
+    <div style="font-size:0.85rem; color:#555;">
+     Este árbol es una simplificación controlada del modelo generalizado,
+     generada aplicando filtros de confianza y soporte para la clase
+     seleccionada. Su estructura depende de los parámetros definidos
+     en la sección <b>3. Filtros de Simplificación</b>.
+    </div>
+        
     
     tree_ = modelo.tree_
     cidx = idx_objetivo
@@ -1724,13 +1732,7 @@ with col2:
         else:
             reduccion_pct = 0.0
 
-        <div style="font-size:0.85rem; color:#555;">
-            Este árbol es una simplificación controlada del modelo generalizado,
-            generada aplicando filtros de confianza y soporte para la clase
-            seleccionada. Su estructura depende de los parámetros definidos
-            en la sección <b>3. Filtros de Simplificación</b>.
-          </div>
-        
+           
         # calcular variables influyentes
         if keep_mask is not None and keep_mask.any():
             top_vars = top_variables_influyentes(
