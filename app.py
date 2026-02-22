@@ -1545,7 +1545,7 @@ with col1:
     "en la misma parte del modelo. " 
     "La estructura solo se modifica " 
     "cuando los filtros alteran las ramas del modelo " 
-    "que satisfacen los criterios definidos. "
+    "que satisfacen los umbrales de Confianza y Soporte establecidos. "
     )    
 
 # -----------------------------------------------------------------------------
