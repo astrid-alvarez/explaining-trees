@@ -1632,7 +1632,8 @@ with col2:
     with st.expander("🆚 Comparar con Árbol Generalizado (Clic para desplegar)", expanded=False):
     
         st.markdown(f"### {nombre_bd}")
-
+        
+        with open(nombre_imagen_global, "rb") as f:
          st.download_button(
              "⬇️ Descargar Árbol Generalizado (PNG)",
              data=f.read(),
