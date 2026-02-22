@@ -1878,16 +1878,10 @@ with col2:
         f"</div>",
         unsafe_allow_html=True
         )
-        mostrar_dot_en_streamlit(g)
-        
         # =========================================================
         # DESCARGA: ÁRBOL ESPECIALISTA (PNG)  -> DEBAJO DEL ÁRBOL
         # =========================================================
-        # nombre_base debe existir ANTES. Si no lo tienes, define uno seguro:
-        # (ponlo una sola vez arriba, NO dentro del try)
-        # nombre_base = re.sub(r"[^A-Za-z0-9_\-]+", "_", f"{nombre_bd}_{clase_elegida}_tau{confianza_pct:.0f}_sup{soporte_absoluto}")
-        
-       
+               
         try:
             png_bytes = g.pipe(format="png")
             st.download_button(
@@ -1898,6 +1892,10 @@ with col2:
             )
         except Exception as e:
             st.warning(f"No fue posible generar la descarga del Árbol Especialista: {e}")
+        
+        mostrar_dot_en_streamlit(g)
+        
+        
       
 
     
