@@ -1772,7 +1772,7 @@ with col2:
         
           <div style="margin-bottom:8px;">
             <b>Resumen del Árbol Especialista:</b>
-            profundidad máx = {prof_keep} | nodos = {nodos_keep} | hojas = {hojas_keep} |
+            profundidad máx = {prof_keep} | nodos = {nodos_keep}-1 | hojas = {hojas_keep} |
             reducción estructural = {reduccion_pct:.1f}%.
           </div>
         
