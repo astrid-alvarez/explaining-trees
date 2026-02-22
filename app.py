@@ -1877,8 +1877,7 @@ with col2:
         # (ponlo una sola vez arriba, NO dentro del try)
         # nombre_base = re.sub(r"[^A-Za-z0-9_\-]+", "_", f"{nombre_bd}_{clase_elegida}_tau{confianza_pct:.0f}_sup{soporte_absoluto}")
         
-        st.markdown("**Descarga (Árbol Especialista):**")
-        
+       
         try:
             png_bytes = g.pipe(format="png")
             st.download_button(
