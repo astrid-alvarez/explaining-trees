@@ -84,7 +84,7 @@ def mostrar_dot_en_streamlit(dot, vh=85, height_px=900):
         }})();
         </script>
         """
-        components.html(html, height=1000, scrolling=True)
+        components.html(html, height=1400, scrolling=True)
 
 
     except Exception as e:
