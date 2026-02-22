@@ -1,3 +1,4 @@
+
 # =============================================================================
 # APLICACIÓN WEB PARA EVALUACIÓN CUALITATIVA (OE3)
 # Autor: Astrid Yinnet Álvarez Castro
@@ -1769,6 +1770,27 @@ with col2:
         """).strip()
     
         st.markdown(html_resumen, unsafe_allow_html=True)
+
+        # -----------------------------
+        # Variables más influyentes (árbol especialista)
+        # -----------------------------
+        st.markdown("**Variables más influyentes (Árbol Especialista):**")
+    
+        if keep_mask is not None and keep_mask.any():
+            top_vars = top_variables_influyentes(
+                tree_=tree_,
+                keep_mask=keep_mask,
+                feature_names=feat_names,
+                topk=5
+            )
+    
+            if len(top_vars) == 0:
+                st.caption("—")
+            else:
+                for v in top_vars:
+                    st.markdown(f"- {v}")
+        else:
+            st.caption("—")
     
         # =========================================================
         # LISTA DE REGLAS (dentro de expander)
