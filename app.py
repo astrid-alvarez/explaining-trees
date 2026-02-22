@@ -1885,9 +1885,14 @@ with col2:
         except Exception as e:
             st.warning(f"No fue posible generar la descarga del Árbol Especialista: {e}")
     
+      
+        # =========================================================
+        # Mostrar el árbol 
+        # =========================================================
+        mostrar_dot_en_streamlit(g)
+    
     else:
         st.caption("— No se generó árbol especialista con los filtros actuales.")
-   
 
       
 
