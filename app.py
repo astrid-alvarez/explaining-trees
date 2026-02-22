@@ -1867,29 +1867,28 @@ with col2:
         # =========================================================
         # Mostrar el árbol 
         # =========================================================
+        
         mostrar_dot_en_streamlit(g)
-    
-    else:
-        st.caption("— No se generó árbol especialista con los filtros actuales.")
-
-    # =========================================================
-        # DESCARGA: ÁRBOL ESPECIALISTA (PNG)
+        
         # =========================================================
-    st.markdown("**Descarga (Árbol Especialista):**")
+        # DESCARGA: ÁRBOL ESPECIALISTA (PNG)  -> DEBAJO DEL ÁRBOL
+        # =========================================================
+        # nombre_base debe existir ANTES. Si no lo tienes, define uno seguro:
+        # (ponlo una sola vez arriba, NO dentro del try)
+        # nombre_base = re.sub(r"[^A-Za-z0-9_\-]+", "_", f"{nombre_bd}_{clase_elegida}_tau{confianza_pct:.0f}_sup{soporte_absoluto}")
+        
+        st.markdown("**Descarga (Árbol Especialista):**")
         
         try:
             png_bytes = g.pipe(format="png")
-        
             st.download_button(
                 "⬇️ Descargar Árbol Especialista (PNG)",
                 data=png_bytes,
                 file_name=f"ARBOL_ESPECIALISTA_{nombre_base}.png",
                 mime="image/png"
             )
-        
         except Exception as e:
             st.warning(f"No fue posible generar la descarga del Árbol Especialista: {e}")
-    
       
 
     
