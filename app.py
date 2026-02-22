@@ -1801,6 +1801,33 @@ with col2:
                 st.caption("— No fue posible generar reglas con los filtros actuales.")
             else:
                 total_base = float(tree_.n_node_samples[0]) if tree_.n_node_samples[0] > 0 else 1.0
+
+            # =========================================================
+            # DESCARGA: REGLAS (TXT/CSV)
+            # =========================================================
+            if reglas:
+                total_base = float(tree_.n_node_samples[0]) if tree_.n_node_samples[0] > 0 else 1.0
+            
+                # Construir texto (1 regla por línea)
+                lineas = []
+                for i, r in enumerate(reglas, start=1):
+                    soporte_pct = (r["samples"] / total_base) * 100.0
+                    regla_str = " | ".join(r["conds_recortadas"])
+                    if r["n_conds_extra"] > 0:
+                        regla_str += f" | … y {r['n_conds_extra']} condiciones más"
+            
+                    lineas.append(
+                        f"Regla #{i} | Confianza: {r['p_c']*100:.2f}% | Soporte: {r['samples']} ({soporte_pct:.2f}%) | {regla_str}"
+                    )
+            
+                reglas_txt = "\n".join(lineas)
+            
+                st.download_button(
+                    "⬇️ Descargar Reglas (TXT)",
+                    data=reglas_txt.encode("utf-8"),
+                    file_name=f"REGLAS_{nombre_base}.txt",
+                    mime="text/plain"
+                )
         
                 for i, r in enumerate(reglas, start=1):
                     soporte_pct = (r["samples"] / total_base) * 100.0
@@ -1833,6 +1860,40 @@ with col2:
         # =========================================================
         # Mostrar el árbol 
         # =========================================================
+        # =========================================================
+        # DESCARGA: ÁRBOL ESPECIALISTA (PNG/SVG)
+        # =========================================================
+        st.markdown("**Descargas (Árbol Especialista):**")
+        
+        col_dl1, col_dl2 = st.columns([1, 1])
+        
+        # Nombre base (único por BD + clase + filtros)
+        prefijo_bd = nombre_bd.split('_')[0]
+        nombre_base = f"ARBOL_ESPECIALISTA_{prefijo_bd}_{class_names[cidx]}_tau{tau:.2f}_sup{soporte_absoluto}"
+        
+        try:
+            # SVG (recomendado: liviano, no se pixela)
+            svg_bytes = g.pipe(format="svg")
+            with col_dl1:
+                st.download_button(
+                    "⬇️ Descargar Árbol Especialista (SVG)",
+                    data=svg_bytes,
+                    file_name=f"{nombre_base}.svg",
+                    mime="image/svg+xml"
+                )
+        
+            # PNG (útil para documentos rápidos)
+            png_bytes = g.pipe(format="png")
+            with col_dl2:
+                st.download_button(
+                    "⬇️ Descargar Árbol Especialista (PNG)",
+                    data=png_bytes,
+                    file_name=f"{nombre_base}.png",
+                    mime="image/png"
+                )
+        
+        except Exception as e:
+            st.warning(f"No fue posible generar la descarga del Árbol Especialista: {e}")
         mostrar_dot_en_streamlit(g)
     
     else:
