@@ -1877,7 +1877,12 @@ with col2:
         # =========================================================
         # Mostrar el árbol 
         # =========================================================
-        
+        st.markdown(
+        f"<div style='font-size:1.05rem; font-weight:700; margin:6px 0 10px 0;'>"
+        f"Clase: {class_names[cidx]} | Confianza: τ={tau:.2f} | Soporte: ≥{soporte_absoluto} muestras"
+        f"</div>",
+        unsafe_allow_html=True
+        )
         mostrar_dot_en_streamlit(g)
         
         # =========================================================
