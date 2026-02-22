@@ -1777,6 +1777,13 @@ with col2:
         """).strip()
         
         st.markdown(html_resumen, unsafe_allow_html=True)
+
+        # -----------------------------
+        # Nombre base para descargas (árbol + reglas)
+        # -----------------------------
+        prefijo_bd = nombre_bd.split('_')[0]
+        clase_safe = re.sub(r"[^A-Za-z0-9_-]+", "_", str(class_names[cidx]))  # sin espacios raros
+        nombre_base = f"{prefijo_bd}_{clase_safe}_tau{tau:.2f}_sup{soporte_absoluto}"
     
         # =========================================================
         # LISTA DE REGLAS (dentro de expander)
