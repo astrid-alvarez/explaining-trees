@@ -1879,16 +1879,7 @@ with col2:
         nombre_base = f"ARBOL_ESPECIALISTA_{prefijo_bd}_{class_names[cidx]}_tau{tau:.2f}_sup{soporte_absoluto}"
         
         try:
-            # SVG (recomendado: liviano, no se pixela)
-            svg_bytes = g.pipe(format="svg")
-            with col_dl1:
-                st.download_button(
-                    "⬇️ Descargar Árbol Especialista (SVG)",
-                    data=svg_bytes,
-                    file_name=f"{nombre_base}.svg",
-                    mime="image/svg+xml"
-                )
-        
+                 
             # PNG (útil para documentos rápidos)
             png_bytes = g.pipe(format="png")
             with col_dl2:
