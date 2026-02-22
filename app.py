@@ -1540,10 +1540,12 @@ with col1:
         )
 
     st.caption(
-    "Nota metodológica: El Árbol Especialista exhibe estabilidad estructural "
-    "bajo variaciones en los filtros. La estructura se modifica únicamente "
-    "cuando los parámetros alteran el conjunto de nodos retenidos; "
-    "en caso contrario, la representación gráfica permanece invariante."
+    "Nota metodológica: "Si al ajustar los filtros el árbol no cambia," 
+    "significa que las condiciones seleccionadas siguen cumpliéndose" 
+    "en la misma parte del modelo." 
+    "La estructura solo se modifica" 
+    "cuando los filtros alteran las ramas del modelo" 
+    "que satisfacen los criterios definidos."
     )    
 
 # -----------------------------------------------------------------------------
