@@ -1723,6 +1723,13 @@ with col2:
             reduccion_pct = 100 * (1 - nodos_keep / total_nodos_general)
         else:
             reduccion_pct = 0.0
+
+        <div style="font-size:0.85rem; color:#555;">
+            Este árbol es una simplificación controlada del modelo generalizado,
+            generada aplicando filtros de confianza y soporte para la clase
+            seleccionada. Su estructura depende de los parámetros definidos
+            en la sección <b>3. Filtros de Simplificación</b>.
+          </div>
         
         # calcular variables influyentes
         if keep_mask is not None and keep_mask.any():
@@ -1758,12 +1765,7 @@ with col2:
             {vars_line}
           </div>
         
-          <div style="font-size:0.85rem; color:#555;">
-            Este árbol es una simplificación controlada del modelo generalizado,
-            generada aplicando filtros de confianza y soporte para la clase
-            seleccionada. Su estructura depende de los parámetros definidos
-            en la sección <b>3. Filtros de Simplificación</b>.
-          </div>
+          
         
         </div>
         """).strip()
