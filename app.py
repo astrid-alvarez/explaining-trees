@@ -1713,49 +1713,18 @@ with col2:
     if g is not None:
     
         # -----------------------------
-        # TARJETA: RESUMEN ÁRBOL ESPECIALISTA
+        # TARJETA: RESUMEN ÁRBOL ESPECIALISTA + VARIABLES
         # -----------------------------
-        total_nodos_general = n_nodes  # viene del resumen del generalizado
+        
+        total_nodos_general = n_nodes
         prof_keep, nodos_keep, hojas_keep = stats_subarbol_keep(tree_, keep_mask)
-    
+        
         if total_nodos_general > 0:
             reduccion_pct = 100 * (1 - nodos_keep / total_nodos_general)
         else:
             reduccion_pct = 0.0
-    
-        html_resumen = textwrap.dedent(f"""
-        <div style="background-color:#FFFFFF;
-            padding:14px 16px;
-            border-radius:10px;
-            color:black;
-            font-size:0.92rem;
-            border:1px solid #e0e0e0;
-            line-height:1.45;
-            margin-bottom:12px;">
-    
-          <div style="margin-bottom:8px;">
-            <b>Resumen del Árbol Especialista:</b>
-            profundidad máx = {prof_keep} | nodos = {nodos_keep} | hojas = {hojas_keep} |
-            reducción estructural = {reduccion_pct:.1f}%.
-          </div>
-    
-          <div style="font-size:0.85rem; color:#555;">
-            Este árbol es una simplificación controlada del modelo generalizado,
-            generada aplicando filtros de confianza y soporte para la clase
-            seleccionada. Su estructura depende de los parámetros definidos
-            en la sección <b>3. Filtros de Simplificación</b>.
-          </div>
-    
-        </div>
-        """).strip()
-    
-        st.markdown(html_resumen, unsafe_allow_html=True)
-
-        st.markdown("**Variables más influyentes (Árbol Especialista):**")
-        <div style="margin-bottom:8px;">
-         <b>Variables más influyentes (Árbol Especialista):</b>
-            {vars_line}
-         </div>
+        
+        # calcular variables influyentes
         if keep_mask is not None and keep_mask.any():
             top_vars = top_variables_influyentes(
                 tree_=tree_,
@@ -1763,25 +1732,43 @@ with col2:
                 feature_names=feat_names,
                 topk=5
             )
-        
-            if len(top_vars) == 0:
-                st.caption("—")
-            else:
-                html_vars = textwrap.dedent(f"""
-                <div style="background:#FFFFFF;
-                            border:1px solid #e6e6e6;
-                            border-radius:12px;
-                            padding:10px 12px;
-                            color:#111;
-                            line-height:1.35;
-                            margin-bottom:10px;
-                            font-size:0.90rem;">
-                  {" | ".join(top_vars)}
-                </div>
-                """).strip()
-                st.markdown(html_vars, unsafe_allow_html=True)
         else:
-            st.caption("—")
+            top_vars = []
+        
+        vars_line = " | ".join(top_vars) if top_vars else "—"
+        
+        html_resumen = textwrap.dedent(f"""
+        <div style="background-color:#FFFFFF;
+            padding:14px 16px;
+            border-radius:10px;
+            color:#111;
+            font-size:0.92rem;
+            border:1px solid #e0e0e0;
+            line-height:1.45;
+            margin-bottom:12px;">
+        
+          <div style="margin-bottom:8px;">
+            <b>Resumen del Árbol Especialista:</b>
+            profundidad máx = {prof_keep} | nodos = {nodos_keep} | hojas = {hojas_keep} |
+            reducción estructural = {reduccion_pct:.1f}%.
+          </div>
+        
+          <div style="margin-bottom:8px;">
+            <b>Variables más influyentes (Árbol Especialista):</b>
+            {vars_line}
+          </div>
+        
+          <div style="font-size:0.85rem; color:#555;">
+            Este árbol es una simplificación controlada del modelo generalizado,
+            generada aplicando filtros de confianza y soporte para la clase
+            seleccionada. Su estructura depende de los parámetros definidos
+            en la sección <b>3. Filtros de Simplificación</b>.
+          </div>
+        
+        </div>
+        """).strip()
+        
+        st.markdown(html_resumen, unsafe_allow_html=True)
     
         # =========================================================
         # LISTA DE REGLAS (dentro de expander)
