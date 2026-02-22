@@ -1296,7 +1296,7 @@ def build_compacted_graphviz_strict(modelo, clase, tau, soporte,
     draw(root_id, parent_p=0.0)
     return dot
 
-def top_variables_generalizado(tree_, feature_names, topk=5):
+def top_variables_generalizado(tree_, feature_names, topk=10):
     """
     Variables más influyentes del ÁRBOL GENERALIZADO.
     Mismo criterio del especialista: cuenta cuántas veces aparece cada variable
@@ -1592,7 +1592,7 @@ with col2:
         top_vars_global = top_variables_generalizado(
             tree_=modelo.tree_,
             feature_names=feat_names,
-            topk=5
+            topk=10
         )
     except Exception:
         top_vars_global = []
@@ -1756,7 +1756,7 @@ with col2:
                 tree_=tree_,
                 keep_mask=keep_mask,
                 feature_names=feat_names,
-                topk=5
+                topk=10
             )
         else:
             top_vars = []
@@ -1812,8 +1812,8 @@ with col2:
                     class_idx=cidx,
                     feature_names=feat_names,
                     class_label=class_names[cidx],
-                    topk=10,
-                    top_lines=10**9,          # ✅ NO recortar condiciones
+                    topk=30,
+                    top_lines=10**9,          #  NO recortar condiciones
                     ordenar="confianza_soporte"
                 )
         
