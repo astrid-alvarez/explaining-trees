@@ -1752,7 +1752,7 @@ with col2:
         st.markdown(html_resumen, unsafe_allow_html=True)
 
         st.markdown("**Variables más influyentes (Árbol Especialista):**")
-
+        <b>Variables más influyentes (Árbol Especialista):</b>
         if keep_mask is not None and keep_mask.any():
             top_vars = top_variables_influyentes(
                 tree_=tree_,
