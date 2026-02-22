@@ -1771,7 +1771,7 @@ with col2:
           </div>
         
           <div style="margin-bottom:8px;">
-            <b>Variables más influyentes (Árbol Especialista):</b>
+            <b>Variables más influyentes:</b>
             {vars_line}
           </div>
         
@@ -1785,7 +1785,7 @@ with col2:
         # =========================================================
         # LISTA DE REGLAS (dentro de expander)
         # =========================================================
-        with st.expander("Reglas (ordenadas)", expanded=False):
+        with st.expander("Reglas", expanded=False):
         
             reglas = []
         
