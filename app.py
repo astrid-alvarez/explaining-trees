@@ -1540,12 +1540,12 @@ with col1:
         )
 
     st.caption(
-    "Nota metodológica: "Si al ajustar los filtros el árbol no cambia," 
-    "significa que las condiciones seleccionadas siguen cumpliéndose" 
-    "en la misma parte del modelo." 
-    "La estructura solo se modifica" 
-    "cuando los filtros alteran las ramas del modelo" 
-    "que satisfacen los criterios definidos."
+    "Nota metodológica: "Si al ajustar los filtros el árbol no cambia, " 
+    "significa que las condiciones seleccionadas siguen cumpliéndose " 
+    "en la misma parte del modelo. " 
+    "La estructura solo se modifica " 
+    "cuando los filtros alteran las ramas del modelo " 
+    "que satisfacen los criterios definidos. "
     )    
 
 # -----------------------------------------------------------------------------
