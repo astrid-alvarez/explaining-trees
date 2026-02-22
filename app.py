@@ -84,7 +84,7 @@ def mostrar_dot_en_streamlit(dot, vh=85, height_px=900):
         }})();
         </script>
         """
-        components.html(html, height=950, scrolling=False)
+        components.html(html, height=750, scrolling=True)
 
 
     except Exception as e:
@@ -1853,7 +1853,7 @@ with col2:
                         regla_str += f" | … y {r['n_conds_extra']} condiciones más"
             
                     lineas.append(
-                        f"Regla #{i} | Confianza: {r['p_c']*100:.2f}% | Soporte: {r['samples']} ({soporte_pct:.2f}%) | {regla_str}"
+                        f"Regla #{i} | Confianza: {r['p_c']*100:.1f}% | Soporte: {r['samples']} ({soporte_pct:.1f}%) | {regla_str}"
                     )
             
                 reglas_txt = "\n".join(lineas)
