@@ -1655,12 +1655,20 @@ with col2:
     # -----------------------------
     st.subheader("🌳 ÁRBOL ESPECIALISTA")
 
-    <div style="font-size:0.85rem; color:#555;">
-     Este árbol es una simplificación controlada del modelo generalizado,
-     generada aplicando filtros de confianza y soporte para la clase
-     seleccionada. Su estructura depende de los parámetros definidos
-     en la sección <b>3. Filtros de Simplificación</b>.
+    st.markdown(
+    """
+    <div style="font-size:0.90rem; 
+                color:#cfcfcf; 
+                margin-bottom:12px; 
+                line-height:1.4;">
+        Este árbol es una simplificación controlada del modelo generalizado,
+        generada aplicando filtros de confianza y soporte para la clase seleccionada.
+        Su estructura depende de los parámetros definidos en la sección
+        <b>3. Filtros de Simplificación</b>.
     </div>
+    """,
+    unsafe_allow_html=True
+    )
         
     
     tree_ = modelo.tree_
