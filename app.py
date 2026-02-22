@@ -1751,11 +1751,8 @@ with col2:
     
         st.markdown(html_resumen, unsafe_allow_html=True)
 
-        # -----------------------------
-        # Variables más influyentes (árbol especialista)
-        # -----------------------------
         st.markdown("**Variables más influyentes (Árbol Especialista):**")
-        
+
         if keep_mask is not None and keep_mask.any():
             top_vars = top_variables_influyentes(
                 tree_=tree_,
@@ -1767,8 +1764,19 @@ with col2:
             if len(top_vars) == 0:
                 st.caption("—")
             else:
-                # línea con barras
-                st.markdown(" | ".join(top_vars))
+                html_vars = textwrap.dedent(f"""
+                <div style="background:#FFFFFF;
+                            border:1px solid #e6e6e6;
+                            border-radius:12px;
+                            padding:10px 12px;
+                            color:#111;
+                            line-height:1.35;
+                            margin-bottom:10px;
+                            font-size:0.90rem;">
+                  {" | ".join(top_vars)}
+                </div>
+                """).strip()
+                st.markdown(html_vars, unsafe_allow_html=True)
         else:
             st.caption("—")
     
