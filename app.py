@@ -1803,72 +1803,72 @@ with col2:
         # =========================================================
         with st.expander("Reglas", expanded=False):
 
-    reglas = []
-    if keep_mask is not None and keep_mask.any():
-        reglas = listar_reglas_balance(
-            modelo=modelo,
-            keep_mask=keep_mask,
-            class_idx=cidx,
-            feature_names=feat_names,
-            class_label=class_names[cidx],
-            topk=10,
-            top_lines=8,
-            ordenar="confianza_soporte"
-        )
-
-    if not reglas:
-        st.caption("— No fue posible generar reglas con los filtros actuales.")
-    else:
-        total_base = float(tree_.n_node_samples[0]) if tree_.n_node_samples[0] > 0 else 1.0
-
-        # BOTÓN (descarga)
-        lineas = []
-        for i, r in enumerate(reglas, start=1):
-            soporte_pct = (r["samples"] / total_base) * 100.0
-            regla_str = " | ".join(r["conds_recortadas"])
-            if r["n_conds_extra"] > 0:
-                regla_str += f" | … y {r['n_conds_extra']} condiciones más"
-
-            lineas.append(
-                f"Regla #{i} | Confianza: {r['p_c']*100:.2f}% | Soporte: {r['samples']} ({soporte_pct:.2f}%) | {regla_str}"
-            )
-
-        reglas_txt = "\n".join(lineas)
-        st.download_button(
-            "⬇️ Descargar Reglas (TXT)",
-            data=reglas_txt.encode("utf-8"),
-            file_name=f"REGLAS_{nombre_bd}.txt",
-            mime="text/plain"
-        )
-
-        # LISTADO
-        for i, r in enumerate(reglas, start=1):
-            soporte_pct = (r["samples"] / total_base) * 100.0
-
-            html = textwrap.dedent(f"""
-            <div style="background:#FFFFFF;
-                        border:1px solid #e6e6e6;
-                        border-radius:12px;
-                        padding:12px 14px;
-                        color:#111;
-                        line-height:1.35;
-                        margin-bottom:10px;">
-
-              <div style="font-size:0.92rem;">
-                  <b>Regla #{i}</b> &nbsp; | &nbsp;
-                  Confianza: {r["p_c"]*100:.1f}% &nbsp; | &nbsp;
-                  Soporte: {r["samples"]} ({soporte_pct:.1f}%)
-              </div>
-
-              <div style="font-size:0.86rem; color:#111; line-height:1.35; margin-top:6px;">
-                {" | ".join(r["conds_recortadas"])}
-                {f" | … y {r['n_conds_extra']} condiciones más" if r["n_conds_extra"]>0 else ""}
-              </div>
-
-            </div>
-            """).strip()
-
-            st.markdown(html, unsafe_allow_html=True)
+            reglas = []
+            if keep_mask is not None and keep_mask.any():
+                reglas = listar_reglas_balance(
+                    modelo=modelo,
+                    keep_mask=keep_mask,
+                    class_idx=cidx,
+                    feature_names=feat_names,
+                    class_label=class_names[cidx],
+                    topk=10,
+                    top_lines=8,
+                    ordenar="confianza_soporte"
+                )
+        
+            if not reglas:
+                st.caption("— No fue posible generar reglas con los filtros actuales.")
+            else:
+                total_base = float(tree_.n_node_samples[0]) if tree_.n_node_samples[0] > 0 else 1.0
+        
+                # BOTÓN (descarga)
+                lineas = []
+                for i, r in enumerate(reglas, start=1):
+                    soporte_pct = (r["samples"] / total_base) * 100.0
+                    regla_str = " | ".join(r["conds_recortadas"])
+                    if r["n_conds_extra"] > 0:
+                        regla_str += f" | … y {r['n_conds_extra']} condiciones más"
+        
+                    lineas.append(
+                        f"Regla #{i} | Confianza: {r['p_c']*100:.2f}% | Soporte: {r['samples']} ({soporte_pct:.2f}%) | {regla_str}"
+                    )
+        
+                reglas_txt = "\n".join(lineas)
+                st.download_button(
+                    "⬇️ Descargar Reglas (TXT)",
+                    data=reglas_txt.encode("utf-8"),
+                    file_name=f"REGLAS_{nombre_bd}.txt",
+                    mime="text/plain"
+                )
+        
+                # LISTADO
+                for i, r in enumerate(reglas, start=1):
+                    soporte_pct = (r["samples"] / total_base) * 100.0
+        
+                    html = textwrap.dedent(f"""
+                    <div style="background:#FFFFFF;
+                                border:1px solid #e6e6e6;
+                                border-radius:12px;
+                                padding:12px 14px;
+                                color:#111;
+                                line-height:1.35;
+                                margin-bottom:10px;">
+        
+                      <div style="font-size:0.92rem;">
+                          <b>Regla #{i}</b> &nbsp; | &nbsp;
+                          Confianza: {r["p_c"]*100:.1f}% &nbsp; | &nbsp;
+                          Soporte: {r["samples"]} ({soporte_pct:.1f}%)
+                      </div>
+        
+                      <div style="font-size:0.86rem; color:#111; line-height:1.35; margin-top:6px;">
+                        {" | ".join(r["conds_recortadas"])}
+                        {f" | … y {r['n_conds_extra']} condiciones más" if r["n_conds_extra"]>0 else ""}
+                      </div>
+        
+                    </div>
+                    """).strip()
+        
+                    st.markdown(html, unsafe_allow_html=True)
         # =========================================================
         # Mostrar el árbol 
         # =========================================================
