@@ -1634,10 +1634,10 @@ with col2:
         st.markdown(f"### {nombre_bd}")
 
          st.download_button(
-         "⬇️ Descargar Árbol Generalizado (PNG)",
-         data=f.read(),
-         file_name=nombre_imagen_global,
-         mime="image/png"
+             "⬇️ Descargar Árbol Generalizado (PNG)",
+             data=f.read(),
+             file_name=nombre_imagen_global,
+             mime="image/png"
          )
         
         with open(nombre_imagen_global, "rb") as f:
