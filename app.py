@@ -1755,7 +1755,7 @@ with col2:
         # Variables más influyentes (árbol especialista)
         # -----------------------------
         st.markdown("**Variables más influyentes (Árbol Especialista):**")
-    
+        
         if keep_mask is not None and keep_mask.any():
             top_vars = top_variables_influyentes(
                 tree_=tree_,
@@ -1763,12 +1763,12 @@ with col2:
                 feature_names=feat_names,
                 topk=5
             )
-    
+        
             if len(top_vars) == 0:
                 st.caption("—")
             else:
-                for v in top_vars:
-                    st.markdown(f"- {v}")
+                # línea con barras
+                st.markdown(" | ".join(top_vars))
         else:
             st.caption("—")
     
