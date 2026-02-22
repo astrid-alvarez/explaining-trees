@@ -1618,29 +1618,7 @@ with col2:
         st.markdown(f"### {nombre_bd}")
     
  
-        # -----------------------------
-        # Variables más influyentes (Árbol Generalizado)
-        # -----------------------------
-        st.markdown("**Variables más influyentes (Árbol Generalizado):**")
-    
-        try:
-            top_vars_global = top_variables_generalizado(
-                tree_=modelo.tree_,
-                feature_names=feat_names,
-                topk=5
-            )
-    
-            if len(top_vars_global) == 0:
-                st.caption("—")
-            else:
-                for v in top_vars_global:
-                    st.markdown(f"- {v}")
-    
-        except Exception as e:
-            st.caption("—")
-            st.warning(
-                f"No fue posible calcular variables influyentes del árbol generalizado: {e}"
-            )
+       
     
         prefijo_bd = nombre_bd.split('_')[0]
         nombre_imagen_global = f"ARBOL_GENERALIZADO_{prefijo_bd}.png"
@@ -1665,6 +1643,30 @@ with col2:
             st.warning(
                 f"No se encontró la imagen '{nombre_imagen_global}'. "
                 f"Asegúrate de tenerla en la carpeta."
+            )
+
+         # -----------------------------
+        # Variables más influyentes (Árbol Generalizado)
+        # -----------------------------
+        st.markdown("**Variables más influyentes (Árbol Generalizado):**")
+    
+        try:
+            top_vars_global = top_variables_generalizado(
+                tree_=modelo.tree_,
+                feature_names=feat_names,
+                topk=5
+            )
+    
+            if len(top_vars_global) == 0:
+                st.caption("—")
+            else:
+                for v in top_vars_global:
+                    st.markdown(f"- {v}")
+    
+        except Exception as e:
+            st.caption("—")
+            st.warning(
+                f"No fue posible calcular variables influyentes del árbol generalizado: {e}"
             )
 
     # -----------------------------
