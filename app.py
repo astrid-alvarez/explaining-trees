@@ -1868,31 +1868,22 @@ with col2:
         # Mostrar el árbol 
         # =========================================================
         # =========================================================
-        # DESCARGA: ÁRBOL ESPECIALISTA (PNG/SVG)
+        # DESCARGA: ÁRBOL ESPECIALISTA (PNG)
         # =========================================================
-        st.markdown("**Descargas (Árbol Especialista):**")
-        
-        col_dl1, col_dl2 = st.columns([1, 1])
-        
-        # Nombre base (único por BD + clase + filtros)
-        prefijo_bd = nombre_bd.split('_')[0]
-        nombre_base = f"ARBOL_ESPECIALISTA_{prefijo_bd}_{class_names[cidx]}_tau{tau:.2f}_sup{soporte_absoluto}"
+        st.markdown("**Descarga (Árbol Especialista):**")
         
         try:
-                 
-            # PNG (útil para documentos rápidos)
             png_bytes = g.pipe(format="png")
-            with col_dl2:
-                st.download_button(
-                    "⬇️ Descargar Árbol Especialista (PNG)",
-                    data=png_bytes,
-                    file_name=f"{nombre_base}.png",
-                    mime="image/png"
-                )
+        
+            st.download_button(
+                "⬇️ Descargar Árbol Especialista (PNG)",
+                data=png_bytes,
+                file_name=f"ARBOL_ESPECIALISTA_{nombre_base}.png",
+                mime="image/png"
+            )
         
         except Exception as e:
             st.warning(f"No fue posible generar la descarga del Árbol Especialista: {e}")
-        mostrar_dot_en_streamlit(g)
     
     else:
         st.caption("— No se generó árbol especialista con los filtros actuales.")
