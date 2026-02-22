@@ -1514,7 +1514,7 @@ with col1:
             "muy confiables y representativas.\n\n"
             "Sugerencia: reduce la **Confianza mínima** o el **Soporte mínimo** para explorar más explicaciones."
         )
-        # -----------------------------
+    # -----------------------------
     # Calcular keep_mask del árbol especialista (para variables influyentes)
     # -----------------------------
     tree_ = modelo.tree_
@@ -1539,6 +1539,12 @@ with col1:
             min_samples_to_keep=soporte_absoluto
         )
 
+    st.caption(
+    "Nota metodológica: El Árbol Especialista exhibe estabilidad estructural "
+    "bajo variaciones en los filtros. La estructura se modifica únicamente "
+    "cuando los parámetros alteran el conjunto de nodos retenidos; "
+    "en caso contrario, la representación gráfica permanece invariante."
+    )    
 
 # -----------------------------------------------------------------------------
 # PANEL PRINCIPAL: COLUMNA DERECHA (COMPARACIÓN + ÁRBOL)
