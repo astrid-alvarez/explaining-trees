@@ -1081,6 +1081,7 @@ def build_compacted_graphviz_non_strict(modelo, clase, tau, soporte,
         graph_attr={
             "rankdir": "TB",
             "splines": "true",
+            "fontsize": "18",
             "fontname": "Helvetica",
             "dpi": "300",
             "label": (
@@ -1214,6 +1215,7 @@ def build_compacted_graphviz_strict(modelo, clase, tau, soporte,
         graph_attr={
             "rankdir": "TB",
             "splines": "true",
+            "fontsize": "18",
             "fontname": "Helvetica",
             "dpi": "300",
             "label": (
