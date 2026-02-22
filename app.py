@@ -1811,7 +1811,7 @@ with col2:
                     class_idx=cidx,
                     feature_names=feat_names,
                     class_label=class_names[cidx],
-                    topk=10,
+                    topk=30,
                     top_lines=8,
                     ordenar="confianza_soporte"
                 )
