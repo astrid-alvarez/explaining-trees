@@ -1798,11 +1798,12 @@ with col2:
         clase_safe = re.sub(r"[^A-Za-z0-9_-]+", "_", str(class_names[cidx]))  # sin espacios raros
         nombre_base = f"{prefijo_bd}_{clase_safe}_tau{tau:.2f}_sup{soporte_absoluto}"
     
+       
         # =========================================================
         # LISTA DE REGLAS (dentro de expander)
         # =========================================================
         with st.expander("Reglas", expanded=False):
-
+        
             reglas = []
             if keep_mask is not None and keep_mask.any():
                 reglas = listar_reglas_balance(
@@ -1811,8 +1812,8 @@ with col2:
                     class_idx=cidx,
                     feature_names=feat_names,
                     class_label=class_names[cidx],
-                    topk=30,
-                    top_lines=8,
+                    topk=10,
+                    top_lines=10**9,          # ✅ NO recortar condiciones
                     ordenar="confianza_soporte"
                 )
         
@@ -1821,13 +1822,11 @@ with col2:
             else:
                 total_base = float(tree_.n_node_samples[0]) if tree_.n_node_samples[0] > 0 else 1.0
         
-                # BOTÓN (descarga)
+                # ✅ BOTÓN (descarga) ARRIBA: usa condiciones completas
                 lineas = []
                 for i, r in enumerate(reglas, start=1):
                     soporte_pct = (r["samples"] / total_base) * 100.0
-                    regla_str = " | ".join(r["conds_recortadas"])
-                    if r["n_conds_extra"] > 0:
-                        regla_str += f" | … y {r['n_conds_extra']} condiciones más"
+                    regla_str = " | ".join(r["conds"])   # ✅ completo
         
                     lineas.append(
                         f"Regla #{i} | Confianza: {r['p_c']*100:.2f}% | Soporte: {r['samples']} ({soporte_pct:.2f}%) | {regla_str}"
@@ -1841,7 +1840,7 @@ with col2:
                     mime="text/plain"
                 )
         
-                # LISTADO
+                # ✅ LISTADO: muestra condiciones completas (sin “... y N más”)
                 for i, r in enumerate(reglas, start=1):
                     soporte_pct = (r["samples"] / total_base) * 100.0
         
@@ -1861,14 +1860,15 @@ with col2:
                       </div>
         
                       <div style="font-size:0.86rem; color:#111; line-height:1.35; margin-top:6px;">
-                        {" | ".join(r["conds_recortadas"])}
-                        {f" | … y {r['n_conds_extra']} condiciones más" if r["n_conds_extra"]>0 else ""}
+                        {" | ".join(r["conds"])}   <!-- ✅ completo -->
                       </div>
         
                     </div>
                     """).strip()
         
                     st.markdown(html, unsafe_allow_html=True)
+
+       
         # =========================================================
         # Mostrar el árbol 
         # =========================================================
