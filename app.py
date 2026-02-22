@@ -1812,11 +1812,7 @@ with col2:
                         <b>Confianza:</b> {r["p_c"]:.3f} &nbsp; | &nbsp;
                         <b>Soporte:</b> {r["samples"]} ({soporte_pct:.2f}%)
                       </div>
-                
-                      <div style="font-size:0.86rem; margin-bottom:6px;">
-                        <b>Condiciones:</b>
-                      </div>
-                
+                                
                       <div style="font-size:0.86rem; color:#111; line-height:1.35;">
                         {" | ".join(r["conds_recortadas"])}
                         {f" | … y {r['n_conds_extra']} condiciones más" if r["n_conds_extra"]>0 else ""}
