@@ -1632,35 +1632,27 @@ with col2:
     with st.expander("🆚 Comparar con Árbol Generalizado (Clic para desplegar)", expanded=False):
     
         st.markdown(f"### {nombre_bd}")
-        
-            with open(nombre_imagen_global, "rb") as f:
-                st.download_button(
-                    "⬇️ Descargar Árbol Generalizado (PNG)",
-                    data=f.read(),
-                    file_name=nombre_imagen_global,
-                    mime="image/png"
-                 )
-        
-        with open(nombre_imagen_global, "rb") as f:
-
+                 
         prefijo_bd = nombre_bd.split('_')[0]
         nombre_imagen_global = f"ARBOL_GENERALIZADO_{prefijo_bd}.png"
 
     
         if os.path.exists(nombre_imagen_global):
+
+            with open(nombre_imagen_global, "rb") as f:
+                    st.download_button(
+                        "⬇️ Descargar Árbol Generalizado (PNG)",
+                        data=f.read(),
+                        file_name=nombre_imagen_global,
+                        mime="image/png"
+                    )
             st.image(
                 nombre_imagen_global,
                 caption=f"Modelo Generalizado - {prefijo_bd}",
                 use_container_width=True
             )
     
-            with open(nombre_imagen_global, "rb") as f:
-                st.download_button(
-                    "⬇️ Descargar Árbol Generalizado (PNG)",
-                    data=f.read(),
-                    file_name=nombre_imagen_global,
-                    mime="image/png"
-                )
+            
         else:
             st.warning(
                 f"No se encontró la imagen '{nombre_imagen_global}'. "
