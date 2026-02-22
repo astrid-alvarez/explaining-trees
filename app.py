@@ -1566,6 +1566,7 @@ with col2:
     
     max_depth, n_nodes, n_leaves = resumen_arbol(modelo)
     
+    st.markdown("### 4. Visualización de Árboles")
     # -----------------------------
     # TARJETA: ÁRBOL GENERALIZADO
     # -----------------------------
