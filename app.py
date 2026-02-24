@@ -1435,6 +1435,9 @@ with col1:
 
     st.markdown("### 3. Filtros de Simplificación")
 
+    # -----------------------------
+    # Selector (NO se aplica hasta Calcular)
+    # -----------------------------
     modo_arbol = st.radio(
         "Tipo de Árbol",
         (
@@ -1465,24 +1468,17 @@ with col1:
         soporte_pct_pref=1.5
     )
     
-    # Solo resetear valores cuando cambie BD o clase (si no, molesta al usuario)
+    # Solo setear defaults cuando cambie BD o clase
     bd_prev = st.session_state.get("bd_prev")
     cls_prev = st.session_state.get("cls_prev")
     
     if (bd_prev != nombre_bd) or (cls_prev != idx_objetivo):
-        # valores del INPUT (editables)
-        st.session_state["confianza_pct"] = float(conf_sug)
-        st.session_state["soporte_pct"] = float(sop_sug)
-    
-        # valores APLICADOS (los que usa el cálculo)
-        st.session_state["confianza_aplicada"] = float(conf_sug)
-        st.session_state["soporte_aplicado"] = float(sop_sug)
-        st.session_state["modo_aplicado"] = st.session_state.get("modo_arbol", modo_arbol)
-    
+        st.session_state["confianza_pct"] = conf_sug
+        st.session_state["soporte_pct"] = sop_sug
         st.session_state["bd_prev"] = nombre_bd
         st.session_state["cls_prev"] = idx_objetivo
     
-    # Inputs SIEMPRE (sin value= para evitar warning por session_state)
+    # Inputs (EDITABLES)
     st.number_input(
         "Confianza Mínima (%)",
         min_value=0,
@@ -1501,8 +1497,7 @@ with col1:
     )
     
     # ----------------------------------------------------------
-    # Estado: valores APLICADOS (solo cambian con el botón)
-    # (se inicializan una sola vez si no existen)
+    # Estado: valores APLICADOS (estos son los que mueven la plataforma)
     # ----------------------------------------------------------
     if "confianza_aplicada" not in st.session_state:
         st.session_state["confianza_aplicada"] = float(st.session_state["confianza_pct"])
@@ -1512,39 +1507,23 @@ with col1:
         st.session_state["modo_aplicado"] = st.session_state["modo_arbol"]
     
     # -----------------------------
-    # BOTONES: Calcular / Restablecer
+    # BOTÓN: Calcular (APLICA)
     # -----------------------------
-    col_btn1, col_btn2 = st.columns([1, 1])
-    
-    with col_btn1:
-        aplicar = st.button("✅ Calcular", key="btn_calcular_filtros", use_container_width=True)
-    
-    with col_btn2:
-        restablecer = st.button("↩️ Restablecer", key="btn_reset_filtros", use_container_width=True)
+    aplicar = st.button("✅ Calcular", key="btn_calcular_filtros", use_container_width=True)
     
     if aplicar:
         st.session_state["confianza_aplicada"] = float(st.session_state["confianza_pct"])
-        st.session_state["soporte_aplicado"] = float(st.session_state["soporte_pct"])
-        st.session_state["modo_aplicado"] = st.session_state["modo_arbol"]
+        st.session_state["soporte_aplicado"]   = float(st.session_state["soporte_pct"])
+        st.session_state["modo_aplicado"]      = st.session_state["modo_arbol"]
     
-    if restablecer:
-        st.session_state["confianza_pct"] = float(conf_sug)
-        st.session_state["soporte_pct"] = float(sop_sug)
-    
-        st.session_state["confianza_aplicada"] = float(conf_sug)
-        st.session_state["soporte_aplicado"] = float(sop_sug)
-        st.session_state["modo_aplicado"] = "Modo NO ESTRICTO (Original/Exploratorio)"
-        st.session_state["modo_arbol"] = "Modo NO ESTRICTO (Original/Exploratorio)"
-    
-    # ----------------------------------------------------------
-    # USAR SIEMPRE los valores APLICADOS para cálculos
-    # (así NO cambia nada cuando el usuario toca + / -)
-    # ----------------------------------------------------------
+    # ✅ USAR SOLO LOS APLICADOS (aquí está la clave)
     confianza_pct = float(st.session_state["confianza_aplicada"])
-    soporte_pct = float(st.session_state["soporte_aplicado"])
-    modo_arbol_ap = st.session_state["modo_aplicado"]
+    soporte_pct   = float(st.session_state["soporte_aplicado"])
+    modo_arbol_ap = str(st.session_state["modo_aplicado"])
     
-    #  Cálculos
+    # -----------------------------
+    # Cálculos con valores aplicados
+    # -----------------------------
     soporte_absoluto = int(total_registros * (soporte_pct / 100.0))
     if soporte_absoluto < 1:
         soporte_absoluto = 1
@@ -1563,7 +1542,7 @@ with col1:
         )
     
     # -----------------------------
-    # Calcular keep_mask del árbol especialista (para variables influyentes)
+    # keep_mask con valores aplicados
     # -----------------------------
     tree_ = modelo.tree_
     cidx = idx_objetivo
@@ -1574,17 +1553,11 @@ with col1:
     
     if modo_no_estricto:
         keep_mask = _keep_mask_non_strict(
-            tree_,
-            cidx,
-            tau,
-            min_samples_to_keep=soporte_absoluto
+            tree_, cidx, tau, min_samples_to_keep=soporte_absoluto
         )
     else:
         keep_mask = _keep_mask_strict_monotonic(
-            tree_,
-            cidx,
-            tau,
-            min_samples_to_keep=soporte_absoluto
+            tree_, cidx, tau, min_samples_to_keep=soporte_absoluto
         )
     
     st.caption(
@@ -1593,7 +1566,7 @@ with col1:
         "en la misma parte del modelo. "
         "La estructura solo se modifica "
         "cuando los filtros alteran las ramas del modelo "
-        "que satisfacen los umbrales de Confianza y Soporte establecidos."
+        "que satisfacen los umbrales de Confianza y Soporte establecidos. "
     )
 
 # -----------------------------------------------------------------------------
