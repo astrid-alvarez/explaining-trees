@@ -1541,6 +1541,11 @@ with col1:
             min_samples_to_keep=soporte_absoluto
         )
 
+    # -----------------------------
+    # BOTÓN: calcular (no cambia nada, solo fuerza un "momento" de cálculo)
+    # -----------------------------
+    st.button("✅ Calcular", use_container_width=True)
+    
     st.caption(
     "Nota metodológica: Si al ajustar los filtros el árbol no cambia, " 
     "significa que las condiciones seleccionadas siguen cumpliéndose " 
