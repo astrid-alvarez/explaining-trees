@@ -1503,15 +1503,19 @@ with col1:
     
     col_btn1, col_btn2 = st.columns([1, 1])
     with col_btn1:
-        aplicar = st.button("✅ Calcular", use_container_width=True)
+        aplicar = st.button("✅ Calcular", key="btn_calcular_filtros", use_container_width=True)
     with col_btn2:
-        st.button("↩️ Restablecer", use_container_width=True,
-                  on_click=lambda: (
-                      st.session_state.__setitem__("confianza_pct", conf_sug),
-                      st.session_state.__setitem__("soporte_pct", sop_sug),
-                      st.session_state.__setitem__("confianza_aplicada", conf_sug),
-                      st.session_state.__setitem__("soporte_aplicado", sop_sug),
-                  ))
+        st.button(
+            "↩️ Restablecer",
+            key="btn_reset_filtros",
+            use_container_width=True,
+            on_click=lambda: (
+                st.session_state.__setitem__("confianza_pct", conf_sug),
+                st.session_state.__setitem__("soporte_pct", sop_sug),
+                st.session_state.__setitem__("confianza_aplicada", conf_sug),
+                st.session_state.__setitem__("soporte_aplicado", sop_sug),
+            ),
+        )
     
     if aplicar:
         st.session_state["confianza_aplicada"] = float(st.session_state["confianza_pct"])
