@@ -1478,48 +1478,56 @@ with col1:
         st.session_state["bd_prev"] = nombre_bd
         st.session_state["cls_prev"] = idx_objetivo
     
-    # Inputs (EDITABLES)
-    st.number_input(
-        "Confianza Mínima (%)",
-        min_value=0,
-        max_value=100,
-        step=5,
-        key="confianza_pct"
-    )
+    # -----------------------------
+    # Entradas SIN + / - (texto)
+    # -----------------------------
+    def _parse_float_safe(s, default=None):
+        try:
+            s = str(s).strip().replace(",", ".")
+            return float(s)
+        except Exception:
+            return default
     
-    st.number_input(
-        "Soporte Mínimo (% Total)",
-        min_value=0.1,
-        max_value=50.0,
-        step=0.5,
-        format="%.2f",
-        key="soporte_pct"
-    )
+    # Inicializar textos si no existen
+    if "confianza_txt" not in st.session_state:
+        st.session_state["confianza_txt"] = str(conf_sug)
     
-    # ----------------------------------------------------------
-    # Estado: valores APLICADOS (estos son los que mueven la plataforma)
-    # ----------------------------------------------------------
+    if "soporte_txt" not in st.session_state:
+        st.session_state["soporte_txt"] = f"{float(sop_sug):.2f}"
+    
+    st.text_input("Confianza mínima (%)", key="confianza_txt")
+    st.text_input("Soporte mínimo (% total)", key="soporte_txt")
+    
+    conf_in = _parse_float_safe(st.session_state["confianza_txt"], default=float(conf_sug))
+    sup_in  = _parse_float_safe(st.session_state["soporte_txt"], default=float(sop_sug))
+    
+    # Validar rangos
+    conf_in = max(0.0, min(100.0, conf_in))
+    sup_in  = max(0.1, min(50.0, sup_in))
+    
+    # -----------------------------
+    # Botón Calcular
+    # -----------------------------
     if "confianza_aplicada" not in st.session_state:
-        st.session_state["confianza_aplicada"] = float(st.session_state["confianza_pct"])
-    if "soporte_aplicado" not in st.session_state:
-        st.session_state["soporte_aplicado"] = float(st.session_state["soporte_pct"])
-    if "modo_aplicado" not in st.session_state:
-        st.session_state["modo_aplicado"] = st.session_state["modo_arbol"]
+        st.session_state["confianza_aplicada"] = conf_in
     
-    # -----------------------------
-    # BOTÓN: Calcular (APLICA)
-    # -----------------------------
+    if "soporte_aplicado" not in st.session_state:
+        st.session_state["soporte_aplicado"] = sup_in
+    
     aplicar = st.button("✅ Calcular", key="btn_calcular_filtros", use_container_width=True)
     
     if aplicar:
-        st.session_state["confianza_aplicada"] = float(st.session_state["confianza_pct"])
-        st.session_state["soporte_aplicado"]   = float(st.session_state["soporte_pct"])
-        st.session_state["modo_aplicado"]      = st.session_state["modo_arbol"]
+        st.session_state["confianza_aplicada"] = conf_in
+        st.session_state["soporte_aplicado"]   = sup_in
     
-    # ✅ USAR SOLO LOS APLICADOS (aquí está la clave)
+    # USAR SOLO LOS APLICADOS
     confianza_pct = float(st.session_state["confianza_aplicada"])
     soporte_pct   = float(st.session_state["soporte_aplicado"])
-    modo_arbol_ap = str(st.session_state["modo_aplicado"])
+    
+    tau = confianza_pct / 100.0
+   
+    
+    
     
     # -----------------------------
     # Cálculos con valores aplicados
