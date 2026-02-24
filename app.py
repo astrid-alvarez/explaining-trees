@@ -1555,8 +1555,8 @@ with col1:
     tree_ = modelo.tree_
     cidx = idx_objetivo
     
-    modo_no_estricto = ("no estricto" in modo_arbol_ap.lower()) or (
-        "no" in modo_arbol_ap.lower() and "estrict" in modo_arbol_ap.lower()
+    modo_no_estricto = ("no estricto" in modo_arbol.lower()) or (
+        "no" in modo_arbol.lower() and "estrict" in modo_arbol.lower()
     )
     
     if modo_no_estricto:
