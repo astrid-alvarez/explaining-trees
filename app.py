@@ -248,11 +248,14 @@ st.markdown(
 # -----------------------------------------------------------------------------
 # CARGA DE DATOS
 # -----------------------------------------------------------------------------
-@st.cache_resource
-def cargar_archivos_pkl():
-    archivos = [f for f in os.listdir('.') if f.endswith('_app_data.pkl')]
+def obtener_firmas_pkl():
+    archivos = sorted([f for f in os.listdir('.') if f.endswith('_app_data.pkl')])
+    return tuple((f, os.path.getmtime(f), os.path.getsize(f)) for f in archivos)
+
+@st.cache_data(show_spinner=False)
+def cargar_archivos_pkl(firmas_pkl):
     diccionario_datos = {}
-    for nombre_archivo in archivos:
+    for nombre_archivo, _, _ in firmas_pkl:
         try:
             with open(nombre_archivo, 'rb') as f:
                 datos = pickle.load(f)
@@ -261,8 +264,13 @@ def cargar_archivos_pkl():
             st.error(f"Error leyendo {nombre_archivo}: {e}")
     return diccionario_datos
 
+if st.sidebar.button("🔄 Recargar modelos"):
+    st.cache_data.clear()
+    st.cache_resource.clear()
+    st.rerun()
 
-bds_disponibles = cargar_archivos_pkl()
+firmas_pkl = obtener_firmas_pkl()
+bds_disponibles = cargar_archivos_pkl(firmas_pkl)
 
 if not bds_disponibles:
     st.error("No se encontraron archivos .pkl.")
