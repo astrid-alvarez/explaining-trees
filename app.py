@@ -1479,10 +1479,14 @@ with col1:
     # Solo setear defaults cuando cambie BD o clase
     bd_prev = st.session_state.get("bd_prev")
     cls_prev = st.session_state.get("cls_prev")
-    
+
     if (bd_prev != nombre_bd) or (cls_prev != idx_objetivo):
-        st.session_state["confianza_pct"] = conf_sug
-        st.session_state["soporte_pct"] = sop_sug
+        st.session_state["confianza_txt"] = str(conf_sug)
+        st.session_state["soporte_txt"] = f"{float(sop_sug):.2f}"
+        st.session_state["confianza_aplicada"] = float(conf_sug)
+        st.session_state["soporte_aplicado"] = float(sop_sug)
+        st.session_state["confianza_pct"] = float(conf_sug)
+        st.session_state["soporte_pct"] = float(sop_sug)
         st.session_state["bd_prev"] = nombre_bd
         st.session_state["cls_prev"] = idx_objetivo
     
