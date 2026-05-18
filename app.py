@@ -97,6 +97,35 @@ def mostrar_dot_en_streamlit(dot, vh=85, height_px=900):
 # CONFIGURACIÓN Y ESTILOS
 # -----------------------------------------------------------------------------
 st.set_page_config(page_title="Evaluación XAI", layout="wide")
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: #F8FAFC;
+        color: #111827;
+    }
+
+    section[data-testid="stSidebar"] {
+        background-color: #F1F5F9;
+    }
+
+    [data-testid="stHeader"] {
+        background-color: #F8FAFC;
+    }
+
+    div[data-testid="stExpander"] {
+        background-color: #FFFFFF;
+        border: 1px solid #E5E7EB;
+        border-radius: 10px;
+    }
+
+    .stMarkdown, .stText, label, p, span {
+        color: #111827;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 PALETTE = [
     "#FF8C00", "#32CD32", "#8A2BE2", "#00BFFF",
@@ -1615,7 +1644,7 @@ with col2:
     st.markdown(
         """
         <div style="font-size:0.90rem; 
-                    color:#cfcfcf; 
+                    color:#374151; 
                     margin-bottom:12px; 
                     line-height:1.4;">
             Este árbol corresponde al modelo completo entrenado, sin aplicar filtros ni umbrales.
@@ -1707,7 +1736,7 @@ with col2:
     st.markdown(
     """
     <div style="font-size:0.90rem; 
-                color:#cfcfcf; 
+                color:#374151; 
                 margin-bottom:12px; 
                 line-height:1.4;">
         Este árbol es una simplificación controlada del modelo generalizado,
