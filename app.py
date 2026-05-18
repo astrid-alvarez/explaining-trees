@@ -97,9 +97,11 @@ def mostrar_dot_en_streamlit(dot, vh=85, height_px=900):
 # CONFIGURACIÓN Y ESTILOS
 # -----------------------------------------------------------------------------
 st.set_page_config(page_title="Evaluación XAI", layout="wide")
+
 st.markdown(
     """
     <style>
+    
     .stApp {
         background-color: #F8FAFC;
         color: #111827;
@@ -122,6 +124,27 @@ st.markdown(
     .stMarkdown, .stText, label, p, span {
         color: #111827;
     }
+
+    /* Títulos principales numerados: 1, 2, 3 y 4 */
+    .xai-section-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.25;
+        margin-top: 1.2rem;
+        margin-bottom: 0.8rem;
+        color: #111827;
+    }
+
+    /* Ajuste especial para títulos dentro del sidebar */
+    section[data-testid="stSidebar"] .xai-section-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        line-height: 1.25;
+        margin-top: 1rem;
+        margin-bottom: 0.7rem;
+        color: #111827;
+    }
+
     </style>
     """,
     unsafe_allow_html=True
@@ -308,7 +331,10 @@ if not bds_disponibles:
 # -----------------------------------------------------------------------------
 # SIDEBAR: 1. SELECCIÓN DE CASO + DISTRIBUCIÓN
 # -----------------------------------------------------------------------------
-st.sidebar.header("1. Selección de Caso")
+st.sidebar.markdown(
+    '<div class="xai-section-title">1. Selección de Caso</div>',
+    unsafe_allow_html=True
+)
 
 lista_bds = sorted(list(bds_disponibles.keys()))
 nombre_bd = st.sidebar.selectbox("Base de Datos", lista_bds)
@@ -504,7 +530,10 @@ for i, val in enumerate(raw_classes):
     mapa_idx[nombre] = i
 
 st.sidebar.divider()
-st.sidebar.header("2. Selección de Clase")
+st.sidebar.markdown(
+    '<div class="xai-section-title">2. Selección de Clase</div>',
+    unsafe_allow_html=True
+)
 
 clase_elegida = st.sidebar.selectbox("Clase a Explicar", nombres_bonitos)
 idx_objetivo = mapa_idx[clase_elegida]
